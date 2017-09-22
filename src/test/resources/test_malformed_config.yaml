@@ -1,0 +1,17 @@
+bullet.query.max.duration: 10000
+bullet.query.aggregation.max.size: 100
+# Some random fake setting.
+fake.setting: null
+# Partition mappings.
+bullet.pubsub.kafka.request.partitions:
+- 0
+- 1
+- 2
+- 3
+bullet.pubsub.kafka.response.partitions:
+- 0.99
+- 5
+- 6
+- 7
+bullet.pubsub.kafka.request.topic.name: "bullet.queries"
+bullet.pubsub.kafka.response.topic.name: "bullet.responses"

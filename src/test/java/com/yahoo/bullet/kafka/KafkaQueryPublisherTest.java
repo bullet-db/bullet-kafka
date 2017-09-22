@@ -1,0 +1,76 @@
+/*
+ *  Copyright 2017, Yahoo Inc.
+ *  Licensed under the terms of the Apache License, Version 2.0.
+ *  See the LICENSE file associated with the project for terms.
+ */
+package com.yahoo.bullet.kafka;
+
+import com.yahoo.bullet.pubsub.PubSubException;
+import com.yahoo.bullet.pubsub.PubSubMessage;
+import com.yahoo.bullet.pubsub.Publisher;
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.common.TopicPartition;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class KafkaQueryPublisherTest {
+    private static final int NUM_PARTITIONS = 10;
+    private static final int NUM_IDS = 100;
+
+    private static MessageStore messageStore = new MessageStore();
+    private static KafkaProducer<String, byte[]> mockProducer = TestUtils.mockProducerTo(messageStore);
+    private static List<TopicPartition> requestPartitionList = IntStream.range(0, NUM_PARTITIONS)
+                                                                        .mapToObj(x -> new TopicPartition("", x))
+                                                                        .collect(Collectors.toList());
+    private static List<TopicPartition> responsePartitionList = new ArrayList<>(requestPartitionList);
+    private static Publisher publisher = new KafkaQueryPublisher(mockProducer, requestPartitionList, responsePartitionList);
+
+    @BeforeMethod
+    public void setup() throws PubSubException {
+        // Clear the message store and publish some random messages.
+        messageStore.clear();
+        TestUtils.publishRandomMessages(publisher, NUM_IDS, 10);
+    }
+
+    @Test
+    public void testUniqueRequestPartitionPerId() throws Exception {
+        for (Set<TopicPartition> value : messageStore.groupSendPartitionById().values()) {
+            Assert.assertTrue(value.size() <= 1);
+        }
+    }
+
+    @Test
+    public void testUniqueResponsePartitionPerId() throws Exception {
+        for (Set<TopicPartition> value : messageStore.groupReceivePartitionById().values()) {
+            Assert.assertTrue(value.size() <= 1);
+        }
+    }
+
+    @Test(expectedExceptions = PubSubException.class)
+    public void testSendMessageWithNullMetadata() throws Exception {
+        publisher.send(new PubSubMessage("foo", "bar"));
+    }
+
+    @Test
+    public void testClosesPublisher()  throws Exception {
+        publisher.close();
+        Mockito.verify(mockProducer).close();
+    }
+
+    @Test
+    public void testConstructorInjectsArgs() {
+        KafkaQueryPublisher kafkaQueryPublisher = (KafkaQueryPublisher) publisher;
+        Assert.assertEquals(kafkaQueryPublisher.getReceivePartitions(), responsePartitionList);
+        Assert.assertEquals(kafkaQueryPublisher.getWritePartitions(), requestPartitionList);
+        Assert.assertEquals(kafkaQueryPublisher.getProducer(), mockProducer);
+    }
+}
