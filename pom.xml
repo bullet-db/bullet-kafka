@@ -35,7 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <bullet.core-version>0.2.2</bullet.core-version>
+        <bullet.core.version>0.2.3</bullet.core.version>
     </properties>
 
     <dependencies>
@@ -51,6 +51,7 @@
             <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -69,10 +70,16 @@
             <version>1.16.4</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.yahoo.bullet</groupId>
             <artifactId>bullet-core</artifactId>
-            <version>${bullet.core-version}</version>
+            <version>${bullet.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>0.10.2.0</version>
         </dependency>
     </dependencies>
 
@@ -213,6 +220,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
             </plugin>
 
         </plugins>

@@ -1,0 +1,33 @@
+# These are required Kafka settings for consumers and producers
+# For more details see https://kafka.apache.org/documentation/#configuration
+
+# Common Properties
+bullet.pubsub.kafka.bootstrap.servers: "localhost:9091"
+bullet.pubsub.kafka.request.topic.name: "bullet.queries"
+bullet.pubsub.kafka.response.topic.name: "bullet.responses"
+
+# Producer Properties
+bullet.pubsub.kafka.acks: "all"
+bullet.pubsub.kafka.retries: "5"
+bullet.pubsub.kafka.batch.size: "65536"
+bullet.pubsub.kafka.linger.ms: "5"
+bullet.pubsub.kafka.buffer.memory: "33554432"
+bullet.pubsub.kafka.request.timeout.ms: "3000"
+bullet.pubsub.kafka.key.serializer: "org.apache.kafka.common.serialization.StringSerializer"
+bullet.pubsub.kafka.value.serializer: "org.apache.kafka.common.serialization.ByteArraySerializer"
+bullet.pubsub.kafka.max.block.ms: "50000"
+
+# Consumer Specific Properties
+# The number of messages that can received before at least one ack is needed.
+bullet.pubsub.kafka.max.unacked.messages: 50
+bullet.pubsub.kafka.heartbeat.interval.ms: "3000"
+bullet.pubsub.kafka.enable.auto.commit: "false"
+bullet.pubsub.kafka.auto.commit.interval.ms: "1000"
+bullet.pubsub.kafka.session.timeout.ms: "30000"
+bullet.pubsub.kafka.max.poll.records: "50"
+bullet.pubsub.kafka.enable.auto.commit: "true"
+bullet.pubsub.kafka.fetch.max.wait.ms: "500"
+bullet.pubsub.kafka.key.deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+bullet.pubsub.kafka.value.deserializer: "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+bullet.pubsub.kafka.group.id: "consumer-0"
+bullet.pubsub.kafka.max.poll.interval.ms: "10000"

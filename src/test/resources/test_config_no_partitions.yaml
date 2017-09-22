@@ -1,0 +1,6 @@
+bullet.query.max.duration: 10000
+bullet.query.aggregation.max.size: 100
+# Some random fake setting.
+fake.setting: null
+bullet.kafka.request.topic.name: "bullet.queries"
+bullet.kafka.response.topic.name: "bullet.responses"
