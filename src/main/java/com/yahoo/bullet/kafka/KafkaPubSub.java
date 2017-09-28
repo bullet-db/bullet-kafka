@@ -28,7 +28,6 @@ import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_PRODUCER_PROPERTIES;
 public class KafkaPubSub extends PubSub {
     private List<TopicPartition> queryPartitions;
     private List<TopicPartition> responsePartitions;
-    private KafkaConfig config;
     private String queryTopicName;
     private String responseTopicName;
     private String topic;
