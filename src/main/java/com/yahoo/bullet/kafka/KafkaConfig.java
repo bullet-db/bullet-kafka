@@ -8,7 +8,6 @@ package com.yahoo.bullet.kafka;
 import com.yahoo.bullet.BulletConfig;
 import com.yahoo.bullet.Config;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,9 +69,8 @@ public class KafkaConfig extends BulletConfig {
      * Creates a KafkaConfig by reading in a file.
      *
      * @param file The file to read in to create the KafkaConfig.
-     * @throws IOException if the file is malformed or cannot load Kafka defaults.
      */
-    public KafkaConfig(String file) throws IOException {
+    public KafkaConfig(String file) {
         this(new Config(file));
     }
 
@@ -80,9 +78,8 @@ public class KafkaConfig extends BulletConfig {
      * Creates a KafkaConfig from a Config.
      *
      * @param config The {@link Config} to copy settings from.
-     * @throws IOException if unable to load Kafka defaults.
      */
-    public KafkaConfig(Config config) throws IOException {
+    public KafkaConfig(Config config) {
         // Load default Kafka settings. Merge additional settings in Config
         super(DEFAULT_KAFKA_CONFIGURATION);
         merge(config);
