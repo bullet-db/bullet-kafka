@@ -19,9 +19,11 @@ public class KafkaConfigTest {
     @Test
     public void testDefaultFileKafkaSettings() {
         KafkaConfig config = new KafkaConfig("");
-        Assert.assertTrue(config.get("fake_setting") == null);
-        Assert.assertTrue(config.get(KafkaConfig.BATCH_SIZE).equals("65536"));
-        Assert.assertTrue(config.get(KafkaConfig.REQUEST_TOPIC_NAME).equals("bullet.queries"));
+        Assert.assertNull(config.get("fake_setting"));
+        Assert.assertEquals(config.get(KafkaConfig.BATCH_SIZE), "65536");
+        Assert.assertEquals(config.get(KafkaConfig.REQUEST_TOPIC_NAME), "bullet.queries");
+        Assert.assertEquals(config.get(KafkaConfig.REQUEST_TIMEOUT), "3000");
+        Assert.assertEquals(config.get(KafkaConfig.CONSUMER_NAMESPACE + "request.timeout.ms"), "35000");
     }
 
     @Test
@@ -31,10 +33,10 @@ public class KafkaConfigTest {
         config.set(randomString, randomString);
         KafkaConfig kafkaConfig = new KafkaConfig(config);
         // Test copied property.
-        Assert.assertTrue(config.get(randomString).equals(randomString));
-        Assert.assertTrue(kafkaConfig.get(randomString).equals(randomString));
+        Assert.assertEquals(config.get(randomString), randomString);
+        Assert.assertEquals(kafkaConfig.get(randomString), randomString);
         // Test default properties.
-        Assert.assertTrue(kafkaConfig.get(KafkaConfig.BATCH_SIZE).equals("65536"));
+        Assert.assertEquals(kafkaConfig.get(KafkaConfig.BATCH_SIZE), "65536");
         Assert.assertEquals(kafkaConfig.get(KafkaConfig.REQUEST_TOPIC_NAME), "bullet.queries");
     }
 
@@ -42,9 +44,9 @@ public class KafkaConfigTest {
     public void testMakeKafkaProperties() {
         KafkaConfig config = new KafkaConfig("");
         Set<String> keys = new HashSet<>(Collections.singleton(KafkaConfig.REQUEST_TOPIC_NAME));
-        Map<String, Object> kafkaProperties = config.getAllWithPrefix(Optional.of(keys), KafkaPubSub.SETTING_PREFIX, true);
+        Map<String, Object> kafkaProperties = config.getAllWithPrefix(Optional.of(keys), KafkaConfig.KAFKA_NAMESPACE, true);
 
-        String strippedName = KafkaConfig.REQUEST_TOPIC_NAME.substring(KafkaPubSub.SETTING_PREFIX.length());
+        String strippedName = KafkaConfig.REQUEST_TOPIC_NAME.substring(KafkaConfig.KAFKA_NAMESPACE.length());
         Assert.assertEquals(kafkaProperties.size(), 1);
         Assert.assertTrue(kafkaProperties.containsKey(strippedName));
         Assert.assertEquals(kafkaProperties.get(strippedName), "bullet.queries");

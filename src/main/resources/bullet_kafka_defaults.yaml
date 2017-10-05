@@ -1,33 +1,65 @@
 # These are required Kafka settings for consumers and producers
 # For more details see https://kafka.apache.org/documentation/#configuration
 
-# Common Properties
+# Common Kafka Properties
 bullet.pubsub.kafka.bootstrap.servers: "localhost:9091"
+bullet.pubsub.kafka.connections.max.idle.ms: "-1"
+
+# Kafka Producer properties. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.producer"
+bullet.pubsub.kafka.producer.acks: "all"
+bullet.pubsub.kafka.producer.retries: "5"
+bullet.pubsub.kafka.producer.batch.size: "65536"
+bullet.pubsub.kafka.producer.linger.ms: "5"
+bullet.pubsub.kafka.producer.buffer.memory: "33554432"
+bullet.pubsub.kafka.producer.request.timeout.ms: "3000"
+bullet.pubsub.kafka.producer.key.serializer: "org.apache.kafka.common.serialization.StringSerializer"
+bullet.pubsub.kafka.producer.value.serializer: "org.apache.kafka.common.serialization.ByteArraySerializer"
+bullet.pubsub.kafka.producer.max.block.ms: "50000"
+
+# Kafka Consumer properties. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.consumer"
+bullet.pubsub.kafka.consumer.group.id: "bullet-query-consumer"
+bullet.pubsub.kafka.consumer.heartbeat.interval.ms: "3000"
+bullet.pubsub.kafka.consumer.enable.auto.commit: "true"
+bullet.pubsub.kafka.consumer.auto.commit.interval.ms: "1000"
+bullet.pubsub.kafka.consumer.session.timeout.ms: "30000"
+bullet.pubsub.kafka.consumer.max.poll.records: "50"
+bullet.pubsub.kafka.consumer.key.deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+bullet.pubsub.kafka.consumer.value.deserializer: "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+bullet.pubsub.kafka.consumer.fetch.max.wait.ms: "500"
+# These following are optional but must be greater than bullet.pubsub.sleep-ms in the web-service configuration if
+# "bullet.pubsub.context.name" is QUERY_SUBMISSION
+bullet.pubsub.kafka.consumer.max.poll.interval.ms: "30000"
+bullet.pubsub.kafka.consumer.request.timeout.ms: "35000"
+
+# Kafka PubSub properties
+# The number of messages that can received before at least one commit is needed.
+bullet.pubsub.kafka.consumer.max.uncommitted.messages: 50
 bullet.pubsub.kafka.request.topic.name: "bullet.queries"
 bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 
-# Producer Properties
-bullet.pubsub.kafka.acks: "all"
-bullet.pubsub.kafka.retries: "5"
-bullet.pubsub.kafka.batch.size: "65536"
-bullet.pubsub.kafka.linger.ms: "5"
-bullet.pubsub.kafka.buffer.memory: "33554432"
-bullet.pubsub.kafka.request.timeout.ms: "3000"
-bullet.pubsub.kafka.key.serializer: "org.apache.kafka.common.serialization.StringSerializer"
-bullet.pubsub.kafka.value.serializer: "org.apache.kafka.common.serialization.ByteArraySerializer"
-bullet.pubsub.kafka.max.block.ms: "50000"
+# The following settings are optional. If not provided, the topics configured for requests and responses are fully used.
+# If you've partitioned your request and response topics and want to spread them across web-service machines, you can
+# configure the following when you set your "bullet.pubsub.context.name" to QUERY_SUBMISSION and
+# "bullet.pubsub.class.name" to "com.yahoo.bullet.kafka.KafkaPubSub"
 
-# Consumer Specific Properties
-# The number of messages that can received before at least one ack is needed.
-bullet.pubsub.kafka.max.unacked.messages: 50
-bullet.pubsub.kafka.heartbeat.interval.ms: "3000"
-bullet.pubsub.kafka.enable.auto.commit: "false"
-bullet.pubsub.kafka.auto.commit.interval.ms: "1000"
-bullet.pubsub.kafka.session.timeout.ms: "30000"
-bullet.pubsub.kafka.max.poll.records: "50"
-bullet.pubsub.kafka.enable.auto.commit: "true"
-bullet.pubsub.kafka.fetch.max.wait.ms: "500"
-bullet.pubsub.kafka.key.deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
-bullet.pubsub.kafka.value.deserializer: "org.apache.kafka.common.serialization.ByteArrayDeserializer"
-bullet.pubsub.kafka.group.id: "consumer-0"
-bullet.pubsub.kafka.max.poll.interval.ms: "10000"
+# This setting ensures that your publishers only write queries to these partitions.
+#bullet.pubsub.kafka.request.partitions:
+#  - 0
+#  - 1
+#  - 2
+#  - 3
+
+# This setting ensures that your consumers only listen to these partitions. Additionally, the producers will encode
+# one of these partitions into their messages so that the results for their queries only arrive to these partitions.
+#bullet.pubsub.kafka.response.partitions:
+#  - 4
+#  - 5
+#  - 6
+#  - 7
+
+# These two settings together ensure that queries sent to a particular web-service instance will get their results
+# sent to exactly the partitions they are waiting. You can use this to shard your web-service if you want to by
+# partitioning a mutually exclusive set of partitions for each instance. If you do not provide these settings, the
+# entire topic is used. You can still shard the web-service but each instance will read and throw away results they
+# do not know to process. You can also leave out one of these settings to shard either the query writing or the result
+# reading for a hybrid solution.

@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -146,5 +147,16 @@ public class KafkaSubscriberTest {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
         KafkaSubscriber subscriber = new KafkaSubscriber(consumer, 100);
         Assert.assertEquals(subscriber.getConsumer(), consumer);
+    }
+
+    @Test
+    public void testManualCommitting() throws PubSubException {
+        String randomMessage = UUID.randomUUID().toString();
+        String randomID = UUID.randomUUID().toString();
+        KafkaConsumer<String, byte[]> consumer = makeMockConsumer(randomID, randomMessage);
+        KafkaSubscriber subscriber = new KafkaSubscriber(consumer, 10, true);
+        Assert.assertNotNull(subscriber.receive());
+        Assert.assertNull(subscriber.receive());
+        verify(consumer, times(2)).commitAsync();
     }
 }
