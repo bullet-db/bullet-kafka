@@ -14,20 +14,17 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 public class KafkaConfig extends BulletConfig {
-    public static final String TRUE = "true";
-
     public static final String KAFKA_NAMESPACE = "bullet.pubsub.kafka" + DELIMITER;
 
     // Common Kafka properties
     public static final String BOOTSTRAP_SERVERS = KAFKA_NAMESPACE + "bootstrap.servers";
     public static final String CONNECTIONS_MAX_IDLE_MS = KAFKA_NAMESPACE + "connections.max.idle.ms";
-
     // Required common Kafka properties for producers and consumers
     public static final Set<String> KAFKA_PROPERTIES = new HashSet<>(asList(BOOTSTRAP_SERVERS, CONNECTIONS_MAX_IDLE_MS));
 
-    // Producer specific properties
-    public static final String PRODUCER_NAMESPACE = KAFKA_NAMESPACE + "producer" + DELIMITER;
 
+    public static final String PRODUCER_NAMESPACE = KAFKA_NAMESPACE + "producer" + DELIMITER;
+    // Producer specific properties
     public static final String ACKS = PRODUCER_NAMESPACE + "acks";
     public static final String RETRIES = PRODUCER_NAMESPACE + "retries";
     public static final String BATCH_SIZE = PRODUCER_NAMESPACE + "batch.size";
@@ -47,9 +44,9 @@ public class KafkaConfig extends BulletConfig {
         KAFKA_PRODUCER_PROPERTIES.addAll(KAFKA_PROPERTIES);
     }
 
-    // Consumer specific properties
-    public static final String CONSUMER_NAMESPACE = KAFKA_NAMESPACE + "consumer" + DELIMITER;
 
+    public static final String CONSUMER_NAMESPACE = KAFKA_NAMESPACE + "consumer" + DELIMITER;
+    // Consumer specific properties
     public static final String GROUP_ID = CONSUMER_NAMESPACE + "group.id";
     public static final String HEARTBEAT_INTERVAL_MS = CONSUMER_NAMESPACE + "heartbeat.interval.ms";
     public static final String ENABLE_AUTO_COMMIT = CONSUMER_NAMESPACE + "enable.auto.commit";
@@ -74,15 +71,18 @@ public class KafkaConfig extends BulletConfig {
         KAFKA_CONSUMER_PROPERTIES.addAll(KAFKA_PROPERTIES);
     }
 
+
     // Kafka PubSub properties
     public static final String REQUEST_PARTITIONS = KAFKA_NAMESPACE + "request.partitions";
     public static final String RESPONSE_PARTITIONS = KAFKA_NAMESPACE + "response.partitions";
     public static final String REQUEST_TOPIC_NAME = KAFKA_NAMESPACE + "request.topic.name";
     public static final String RESPONSE_TOPIC_NAME = KAFKA_NAMESPACE + "response.topic.name";
-    // Kafka Consumer PubSub properties
+    // Kafka PubSub Consumer properties
     public static final String MAX_UNCOMMITTED_MESSAGES = CONSUMER_NAMESPACE + "max.uncommitted.messages";
 
     public static final String DEFAULT_KAFKA_CONFIGURATION = "bullet_kafka_defaults.yaml";
+    public static final String TRUE = "true";
+
 
     /**
      * Creates a KafkaConfig by reading in a file.

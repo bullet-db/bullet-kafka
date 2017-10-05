@@ -1,11 +1,12 @@
-# These are required Kafka settings for consumers and producers
-# For more details see https://kafka.apache.org/documentation/#configuration
+# These are required Kafka settings for consumers and producers.
+# For more details see https://kafka.apache.org/documentation/#configuration.
 
 # Common Kafka Properties
 bullet.pubsub.kafka.bootstrap.servers: "localhost:9091"
 bullet.pubsub.kafka.connections.max.idle.ms: "-1"
 
-# Kafka Producer properties. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.producer"
+# Kafka Producer properties
+# These are passed to KafkaProducer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.producer".
 bullet.pubsub.kafka.producer.acks: "all"
 bullet.pubsub.kafka.producer.retries: "5"
 bullet.pubsub.kafka.producer.batch.size: "65536"
@@ -16,7 +17,8 @@ bullet.pubsub.kafka.producer.key.serializer: "org.apache.kafka.common.serializat
 bullet.pubsub.kafka.producer.value.serializer: "org.apache.kafka.common.serialization.ByteArraySerializer"
 bullet.pubsub.kafka.producer.max.block.ms: "50000"
 
-# Kafka Consumer properties. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.consumer"
+# Kafka Consumer properties
+# These are passed to KafkaConsumer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.consumer".
 bullet.pubsub.kafka.consumer.group.id: "bullet-query-consumer"
 bullet.pubsub.kafka.consumer.heartbeat.interval.ms: "3000"
 bullet.pubsub.kafka.consumer.enable.auto.commit: "true"
@@ -27,7 +29,7 @@ bullet.pubsub.kafka.consumer.key.deserializer: "org.apache.kafka.common.serializ
 bullet.pubsub.kafka.consumer.value.deserializer: "org.apache.kafka.common.serialization.ByteArrayDeserializer"
 bullet.pubsub.kafka.consumer.fetch.max.wait.ms: "500"
 # These following are optional but must be greater than bullet.pubsub.sleep-ms in the web-service configuration if
-# "bullet.pubsub.context.name" is QUERY_SUBMISSION
+# "bullet.pubsub.context.name" is QUERY_SUBMISSION.
 bullet.pubsub.kafka.consumer.max.poll.interval.ms: "30000"
 bullet.pubsub.kafka.consumer.request.timeout.ms: "35000"
 
@@ -40,7 +42,7 @@ bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 # The following settings are optional. If not provided, the topics configured for requests and responses are fully used.
 # If you've partitioned your request and response topics and want to spread them across web-service machines, you can
 # configure the following when you set your "bullet.pubsub.context.name" to QUERY_SUBMISSION and
-# "bullet.pubsub.class.name" to "com.yahoo.bullet.kafka.KafkaPubSub"
+# "bullet.pubsub.class.name" to "com.yahoo.bullet.kafka.KafkaPubSub".
 
 # This setting ensures that your publishers only write queries to these partitions.
 #bullet.pubsub.kafka.request.partitions:
