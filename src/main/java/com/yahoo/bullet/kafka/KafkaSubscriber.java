@@ -58,11 +58,6 @@ public class KafkaSubscriber extends BufferingSubscriber {
     }
 
     @Override
-    public PubSubMessage receive() throws PubSubException {
-        return super.receive();
-    }
-
-    @Override
     public void close() {
         consumer.close();
     }
