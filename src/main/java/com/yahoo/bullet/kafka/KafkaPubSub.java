@@ -14,7 +14,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.TopicPartition;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,11 +43,7 @@ public class KafkaPubSub extends PubSub {
     public KafkaPubSub(BulletConfig pubSubConfig) throws PubSubException {
         super(pubSubConfig);
         // Copy settings from pubSubConfig.
-        try {
-            config = new KafkaConfig(pubSubConfig);
-        } catch (IOException e) {
-            throw new PubSubException("Could not create KafkaConfig", e);
-        }
+        config = new KafkaConfig(pubSubConfig);
 
         queryTopicName = getRequiredConfig(String.class, KafkaConfig.REQUEST_TOPIC_NAME);
         responseTopicName  = getRequiredConfig(String.class, KafkaConfig.RESPONSE_TOPIC_NAME);
