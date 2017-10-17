@@ -6,7 +6,7 @@ bullet.pubsub.kafka.bootstrap.servers: "localhost:9091"
 bullet.pubsub.kafka.connections.max.idle.ms: "-1"
 
 # Kafka Producer properties
-# These are passed to KafkaProducer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.producer".
+# These are passed to KafkaProducer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.producer.".
 bullet.pubsub.kafka.producer.acks: "all"
 bullet.pubsub.kafka.producer.retries: "5"
 bullet.pubsub.kafka.producer.batch.size: "65536"
@@ -18,7 +18,7 @@ bullet.pubsub.kafka.producer.value.serializer: "org.apache.kafka.common.serializ
 bullet.pubsub.kafka.producer.max.block.ms: "50000"
 
 # Kafka Consumer properties
-# These are passed to KafkaConsumer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.consumer".
+# These are passed to KafkaConsumer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.consumer.".
 bullet.pubsub.kafka.consumer.group.id: "bullet-query-consumer"
 bullet.pubsub.kafka.consumer.heartbeat.interval.ms: "3000"
 bullet.pubsub.kafka.consumer.enable.auto.commit: "true"
@@ -34,8 +34,8 @@ bullet.pubsub.kafka.consumer.max.poll.interval.ms: "30000"
 bullet.pubsub.kafka.consumer.request.timeout.ms: "35000"
 
 # Kafka PubSub properties
-# The number of messages that can received before at least one commit is needed.
-bullet.pubsub.kafka.consumer.max.uncommitted.messages: 50
+# The number of messages that can be received before at least one commit is needed.
+bullet.pubsub.kafka.subscriber.max.uncommitted.messages: 50
 bullet.pubsub.kafka.request.topic.name: "bullet.queries"
 bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 
@@ -60,8 +60,8 @@ bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 #  - 7
 
 # These two settings together ensure that queries sent to a particular web-service instance will get their results
-# sent to exactly the partitions they are waiting. You can use this to shard your web-service if you want to by
-# partitioning a mutually exclusive set of partitions for each instance. If you do not provide these settings, the
-# entire topic is used. You can still shard the web-service but each instance will read and throw away results they
-# do not know to process. You can also leave out one of these settings to shard either the query writing or the result
-# reading for a hybrid solution.
+# sent to exactly the partitions that instance is reading from. You can use this to shard your web-service if you want
+# to, by partitioning a mutually exclusive set of partitions for each instance. If you do not provide these settings, the
+# entire topic is used. You can still shard the web-service but each instance will read all the messages but throw away
+# the ones they do not know how to process. You can also leave out one of these settings to shard either the query
+# writing or the result reading for a hybrid solution.

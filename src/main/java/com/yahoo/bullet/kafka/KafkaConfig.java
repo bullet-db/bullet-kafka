@@ -77,8 +77,8 @@ public class KafkaConfig extends BulletConfig {
     public static final String RESPONSE_PARTITIONS = KAFKA_NAMESPACE + "response.partitions";
     public static final String REQUEST_TOPIC_NAME = KAFKA_NAMESPACE + "request.topic.name";
     public static final String RESPONSE_TOPIC_NAME = KAFKA_NAMESPACE + "response.topic.name";
-    // Kafka PubSub Consumer properties
-    public static final String MAX_UNCOMMITTED_MESSAGES = CONSUMER_NAMESPACE + "max.uncommitted.messages";
+    // Kafka PubSub Subscriber properties
+    public static final String MAX_UNCOMMITTED_MESSAGES = KAFKA_NAMESPACE + "subscriber.max.uncommitted.messages";
 
     public static final String DEFAULT_KAFKA_CONFIGURATION = "bullet_kafka_defaults.yaml";
     public static final String TRUE = "true";
