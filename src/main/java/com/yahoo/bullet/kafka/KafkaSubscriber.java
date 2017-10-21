@@ -24,21 +24,34 @@ import java.util.List;
 public class KafkaSubscriber extends BufferingSubscriber {
     @Getter(AccessLevel.PACKAGE)
     private KafkaConsumer<String, byte[]> consumer;
+    private boolean manualCommit;
 
     /**
      * Creates a KafkaSubscriber using a {@link KafkaConsumer}.
      *
      * @param consumer The {@link KafkaConsumer} to read data from.
-     * @param maxUnackedMessages The maximum number of messages that can be received before an ack is needed.
+     * @param maxUncommittedMessages The maximum number of messages that can be received before a commit is needed.
+     * @param manualCommit Should this subscriber commit its offsets manually.
      */
-    public KafkaSubscriber(KafkaConsumer<String, byte[]> consumer, int maxUnackedMessages) {
-        super(maxUnackedMessages);
+    public KafkaSubscriber(KafkaConsumer<String, byte[]> consumer, int maxUncommittedMessages, boolean manualCommit) {
+        super(maxUncommittedMessages);
         this.consumer = consumer;
+        this.manualCommit = manualCommit;
+    }
+
+    /**
+     *
+     * Creates a KafkaSubscriber using a {@link KafkaConsumer} that does not manually commit.
+     *
+     * @param consumer The {@link KafkaConsumer} to read data from.
+     * @param maxUncommittedMessages The maximum number of messages that can be received before a commit is needed.
+     */
+    public KafkaSubscriber(KafkaConsumer<String, byte[]> consumer, int maxUncommittedMessages) {
+        this(consumer, maxUncommittedMessages, false);
     }
 
     @Override
     public List<PubSubMessage> getMessages() throws PubSubException {
-        consumer.commitSync();
         ConsumerRecords<String, byte[]> buffer;
         try {
             buffer = consumer.poll(0);
@@ -53,6 +66,9 @@ public class KafkaSubscriber extends BufferingSubscriber {
                 continue;
             }
             messages.add((PubSubMessage) message);
+        }
+        if (manualCommit) {
+            consumer.commitAsync();
         }
         return messages;
     }

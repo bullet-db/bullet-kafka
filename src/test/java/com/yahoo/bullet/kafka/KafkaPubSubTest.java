@@ -106,6 +106,17 @@ public class KafkaPubSubTest {
         }
     }
 
+    @Test(expectedExceptions = PubSubException.class,
+          expectedExceptionsMessageRegExp = ".*" + KafkaConfig.BOOTSTRAP_SERVERS + ".*")
+    public void testMissingRequiredProperties() throws Exception {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
+        KafkaConfig kafkaConfig = new KafkaConfig(config);
+        kafkaConfig.set(KafkaConfig.BOOTSTRAP_SERVERS, null);
+        KafkaPubSub kafkaPubSub = new KafkaPubSub(kafkaConfig);
+        kafkaPubSub.getPublisher();
+    }
+
     @Test(expectedExceptions = PubSubException.class)
     public void testMalformedPartitionList() throws Exception {
         BulletConfig config = new BulletConfig("src/test/resources/test_malformed_config.yaml");

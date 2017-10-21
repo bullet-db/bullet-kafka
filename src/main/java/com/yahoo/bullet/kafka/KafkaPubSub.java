@@ -19,10 +19,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.yahoo.bullet.kafka.KafkaConfig.CONSUMER_NAMESPACE;
 import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_CONSUMER_PROPERTIES;
+import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_NAMESPACE;
 import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_PRODUCER_PROPERTIES;
+import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_PROPERTIES;
+import static com.yahoo.bullet.kafka.KafkaConfig.PRODUCER_NAMESPACE;
 
 public class KafkaPubSub extends PubSub {
     private List<TopicPartition> queryPartitions;
@@ -31,8 +36,6 @@ public class KafkaPubSub extends PubSub {
     private String responseTopicName;
     private String topic;
     private List<TopicPartition> partitions;
-
-    public static final String SETTING_PREFIX = KafkaConfig.KAFKA_NAMESPACE + KafkaConfig.DELIMITER;
 
     /**
      * Creates a KafkaPubSub from a {@link BulletConfig}.
@@ -56,7 +59,7 @@ public class KafkaPubSub extends PubSub {
 
     @Override
     public Publisher getPublisher() throws PubSubException {
-        Map<String, Object> properties = config.getAllWithPrefix(Optional.of(KAFKA_PRODUCER_PROPERTIES), SETTING_PREFIX, true);
+        Map<String, Object> properties = getProperties(PRODUCER_NAMESPACE, KAFKA_PRODUCER_PROPERTIES);
         KafkaProducer<String, byte[]> producer = new KafkaProducer<>(properties);
 
         if (context == Context.QUERY_PROCESSING) {
@@ -157,8 +160,15 @@ public class KafkaPubSub extends PubSub {
      * @return The Subscriber reading from the appropriate topic/partitions.
      */
     private Subscriber getSubscriber(List<TopicPartition> partitions, String topicName) throws PubSubException {
-        Map<String, Object> properties = config.getAllWithPrefix(Optional.of(KAFKA_CONSUMER_PROPERTIES), SETTING_PREFIX, true);
-        Long maxUnackedMessages = getRequiredConfig(Long.class, KafkaConfig.MAX_UNACKED_MESSAGES);
+        Map<String, Object> properties = getProperties(CONSUMER_NAMESPACE, KAFKA_CONSUMER_PROPERTIES);
+
+        // Get the PubSub Consumer specific properties
+        Number maxUnackedMessages = getRequiredConfig(Number.class, KafkaConfig.MAX_UNCOMMITTED_MESSAGES);
+
+        // Is autocommit on
+        String autoCommit = getRequiredConfig(String.class, KafkaConfig.ENABLE_AUTO_COMMIT);
+        boolean enableAutoCommit = KafkaConfig.TRUE.equalsIgnoreCase(autoCommit);
+
         KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(properties);
         // Subscribe to the topic if partitions are not set in the config.
         if (partitions == null) {
@@ -166,11 +176,27 @@ public class KafkaPubSub extends PubSub {
         } else {
             consumer.assign(partitions);
         }
-        return new KafkaSubscriber(consumer, maxUnackedMessages.intValue());
+        return new KafkaSubscriber(consumer, maxUnackedMessages.intValue(), !enableAutoCommit);
     }
 
-    private KafkaProducer<String, byte[]> getDummyProducer() {
-        Map<String, Object> properties = config.getAllWithPrefix(Optional.of(KAFKA_PRODUCER_PROPERTIES), SETTING_PREFIX, true);
+    private KafkaProducer<String, byte[]> getDummyProducer() throws PubSubException {
+        Map<String, Object> properties = getProperties(PRODUCER_NAMESPACE, KAFKA_PRODUCER_PROPERTIES);
         return new KafkaProducer<>(properties);
+    }
+
+    private Map<String, Object> getProperties(String namespace, Set<String> required) throws PubSubException {
+        // Validate we have all required properties
+        List<String> missing = required.stream().filter(key -> config.get(key) == null).collect(Collectors.toList());
+        if (!missing.isEmpty()) {
+            throw new PubSubException("Required properties were not found: " + missing);
+        }
+
+        // Get all common Kafka properties and strip the Kafka namespace
+        Map<String, Object> commonProperties = config.getAllWithPrefix(Optional.of(KAFKA_PROPERTIES), KAFKA_NAMESPACE, true);
+        // Get all properties with the namespace and strip it
+        Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), namespace, true);
+        properties.putAll(commonProperties);
+
+        return properties;
     }
 }
