@@ -5,7 +5,7 @@
  */
 package com.yahoo.bullet.kafka;
 
-import com.yahoo.bullet.operations.SerializerDeserializer;
+import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.BufferingSubscriber;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
