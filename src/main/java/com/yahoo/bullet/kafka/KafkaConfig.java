@@ -5,8 +5,8 @@
  */
 package com.yahoo.bullet.kafka;
 
-import com.yahoo.bullet.BulletConfig;
-import com.yahoo.bullet.Config;
+import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.common.Config;
 
 import java.util.HashSet;
 import java.util.Set;
