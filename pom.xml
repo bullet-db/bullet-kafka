@@ -9,7 +9,7 @@
     <name>bullet-kafka</name>
 
     <scm>
-        <developerConnection>scm:git:ssh://git@github.com/yahoo/bullet-kafka.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/bullet-db/bullet-kafka.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
