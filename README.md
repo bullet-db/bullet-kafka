@@ -12,9 +12,9 @@ All documentation is available at **[Github Pages here](https://bullet-db.github
 
 ## Links
 
-* [Bullet Kafka Pubsub](https://bullet-db.github.io/pubsub/kafka/) 
+* [Bullet Kafka Pubsub](https://bullet-db.github.io/pubsub/kafka/) to see Bullet Kafka architecture.
 * [Bullet Kafka Releases](https://bullet-db.github.io/releases/#bullet-kafka) to see Bullet Kafka releases.
-* [PubSub Architecture](https://bullet-db.github.io/pubsub/architecture/) 
+* [PubSub Architecture](https://bullet-db.github.io/pubsub/architecture/) to see PubSub architecture.
 
 ### Useful Links
 
