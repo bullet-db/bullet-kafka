@@ -17,6 +17,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,7 @@ public class KafkaSubscriber extends BufferingSubscriber {
     public List<PubSubMessage> getMessages() throws PubSubException {
         ConsumerRecords<String, byte[]> buffer;
         try {
-            buffer = consumer.poll(0);
+            buffer = consumer.poll(Duration.ZERO);
         } catch (KafkaException e) {
             throw new PubSubException("Consumer poll failed", e);
         }

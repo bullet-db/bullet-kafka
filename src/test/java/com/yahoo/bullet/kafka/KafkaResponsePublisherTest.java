@@ -52,7 +52,7 @@ public class KafkaResponsePublisherTest {
     }
 
     @Test
-    public void testClose() {
+    public void testClose() throws Exception {
         KafkaProducer<String, byte[]> mockProducer = (KafkaProducer<String, byte[]>) mock(KafkaProducer.class);
         Publisher publisher = new KafkaResponsePublisher(mockProducer);
         publisher.close();
