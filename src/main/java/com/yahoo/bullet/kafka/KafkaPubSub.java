@@ -125,16 +125,13 @@ public class KafkaPubSub extends PubSub {
      * @return {@link List} of {@link TopicPartition} values assigned in {@link KafkaConfig}.
      * @throws PubSubException if the setting for partitions is malformed.
      */
-    private List<TopicPartition> parsePartitionsFor(String topicName, String fieldName) throws PubSubException {
+    private List<TopicPartition> parsePartitionsFor(String topicName, String fieldName) {
         if (config.get(fieldName) == null) {
             return null;
         }
         List<TopicPartition> partitionList = new ArrayList<>();
-        List partitionObjectList = config.getAs(fieldName, List.class);
+        List<Long> partitionObjectList = config.getAs(fieldName, List.class);
         for (Object partition : partitionObjectList) {
-            if (!(partition instanceof Long)) {
-                throw new PubSubException(fieldName + " must be a list of integers.");
-            }
             partitionList.add(new TopicPartition(topicName, ((Long) partition).intValue()));
         }
         return partitionList;
