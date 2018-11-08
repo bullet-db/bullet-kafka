@@ -57,16 +57,11 @@ public class KafkaSubscriber extends BufferingSubscriber {
         try {
             buffer = consumer.poll(Duration.ZERO);
         } catch (KafkaException e) {
-            throw new PubSubException("Consumer poll failed", e);
+            throw new PubSubException("Consumer poll failed.", e);
         }
         List<PubSubMessage> messages = new ArrayList<>();
         for (ConsumerRecord<String, byte[]> record : buffer) {
-            Object message = SerializerDeserializer.fromBytes(record.value());
-            if (message == null || !(message instanceof PubSubMessage)) {
-                log.warn("Invalid message received: {}", message);
-                continue;
-            }
-            messages.add((PubSubMessage) message);
+            messages.add(SerializerDeserializer.fromBytes(record.value()));
         }
         if (manualCommit) {
             consumer.commitAsync();

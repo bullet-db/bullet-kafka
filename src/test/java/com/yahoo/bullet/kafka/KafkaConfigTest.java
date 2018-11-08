@@ -16,13 +16,16 @@ import java.util.Optional;
 import java.util.Set;
 
 public class KafkaConfigTest {
+    private static final String BATCH_SIZE = KafkaConfig.PRODUCER_NAMESPACE + "batch.size";
+    private static final String REQUEST_TIMEOUT = KafkaConfig.PRODUCER_NAMESPACE + "request.timeout.ms";
+
     @Test
     public void testDefaultFileKafkaSettings() {
         KafkaConfig config = new KafkaConfig("");
         Assert.assertNull(config.get("fake_setting"));
-        Assert.assertEquals(config.get(KafkaConfig.BATCH_SIZE), "65536");
+        Assert.assertEquals(config.get(BATCH_SIZE), "65536");
         Assert.assertEquals(config.get(KafkaConfig.REQUEST_TOPIC_NAME), "bullet.queries");
-        Assert.assertEquals(config.get(KafkaConfig.REQUEST_TIMEOUT), "3000");
+        Assert.assertEquals(config.get(REQUEST_TIMEOUT), "3000");
         Assert.assertEquals(config.get(KafkaConfig.CONSUMER_NAMESPACE + "request.timeout.ms"), "35000");
     }
 
@@ -36,7 +39,7 @@ public class KafkaConfigTest {
         Assert.assertEquals(config.get(randomString), randomString);
         Assert.assertEquals(kafkaConfig.get(randomString), randomString);
         // Test default properties.
-        Assert.assertEquals(kafkaConfig.get(KafkaConfig.BATCH_SIZE), "65536");
+        Assert.assertEquals(kafkaConfig.get(BATCH_SIZE), "65536");
         Assert.assertEquals(kafkaConfig.get(KafkaConfig.REQUEST_TOPIC_NAME), "bullet.queries");
     }
 

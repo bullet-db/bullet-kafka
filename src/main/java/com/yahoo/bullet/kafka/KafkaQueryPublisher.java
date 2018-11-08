@@ -34,7 +34,7 @@ public class KafkaQueryPublisher implements Publisher {
             TopicPartition responsePartition = getPartition(receivePartitions, message);
             message.getMetadata().setContent(responsePartition);
         } catch (Exception e) {
-            throw new PubSubException("Could not set route metadata. ", e);
+            throw new PubSubException("Could not set route metadata.", e);
         }
     }
 
@@ -47,8 +47,10 @@ public class KafkaQueryPublisher implements Publisher {
     public void send(PubSubMessage message) throws PubSubException {
         TopicPartition requestPartition = getPartition(writePartitions, message);
         setRouteData(message);
-        producer.send(new ProducerRecord<>(requestPartition.topic(), requestPartition.partition(), message.getId(),
-                                            SerializerDeserializer.toBytes(message)));
+        producer.send(new ProducerRecord<>(requestPartition.topic(),
+                                           requestPartition.partition(),
+                                           message.getId(),
+                                           SerializerDeserializer.toBytes(message)));
     }
 
     @Override

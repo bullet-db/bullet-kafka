@@ -19,14 +19,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.yahoo.bullet.kafka.KafkaConfig.CONSUMER_NAMESPACE;
-import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_CONSUMER_PROPERTIES;
 import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_NAMESPACE;
-import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_PRODUCER_PROPERTIES;
-import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_PROPERTIES;
 import static com.yahoo.bullet.kafka.KafkaConfig.PRODUCER_NAMESPACE;
 
 public class KafkaPubSub extends PubSub {
@@ -36,6 +32,8 @@ public class KafkaPubSub extends PubSub {
     private String responseTopicName;
     private String topic;
     private List<TopicPartition> partitions;
+    private Map<String, Object> producerProperties;
+    private Map<String, Object> consumerProperties;
 
     /**
      * Creates a KafkaPubSub from a {@link BulletConfig}.
@@ -48,19 +46,24 @@ public class KafkaPubSub extends PubSub {
         // Copy settings from pubSubConfig.
         config = new KafkaConfig(pubSubConfig);
 
-        queryTopicName = getRequiredConfig(String.class, KafkaConfig.REQUEST_TOPIC_NAME);
-        responseTopicName  = getRequiredConfig(String.class, KafkaConfig.RESPONSE_TOPIC_NAME);
+        queryTopicName = config.getAs(KafkaConfig.REQUEST_TOPIC_NAME, String.class);
+        responseTopicName  = config.getAs(KafkaConfig.RESPONSE_TOPIC_NAME, String.class);
         topic = (context == Context.QUERY_PROCESSING) ? queryTopicName : responseTopicName;
 
         queryPartitions = parsePartitionsFor(queryTopicName, KafkaConfig.REQUEST_PARTITIONS);
         responsePartitions = parsePartitionsFor(responseTopicName, KafkaConfig.RESPONSE_PARTITIONS);
         partitions = (context == Context.QUERY_PROCESSING) ? queryPartitions : responsePartitions;
+
+        Map<String, Object> commonProperties = config.getAllWithPrefix(Optional.empty(), KAFKA_NAMESPACE, true);
+        producerProperties = config.getAllWithPrefix(Optional.empty(), PRODUCER_NAMESPACE, true);
+        producerProperties.putAll(commonProperties);
+        consumerProperties = config.getAllWithPrefix(Optional.empty(), CONSUMER_NAMESPACE, true);
+        consumerProperties.putAll(commonProperties);
     }
 
     @Override
     public Publisher getPublisher() throws PubSubException {
-        Map<String, Object> properties = getProperties(PRODUCER_NAMESPACE, KAFKA_PRODUCER_PROPERTIES);
-        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(properties);
+        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(producerProperties);
 
         if (context == Context.QUERY_PROCESSING) {
             // We don't need to provide topic-partitions here since they should be in the message metadata
@@ -127,10 +130,10 @@ public class KafkaPubSub extends PubSub {
             return null;
         }
         List<TopicPartition> partitionList = new ArrayList<>();
-        List partitionObjectList = getRequiredConfig(List.class, fieldName);
+        List partitionObjectList = config.getAs(fieldName, List.class);
         for (Object partition : partitionObjectList) {
             if (!(partition instanceof Long)) {
-                throw new PubSubException(fieldName + "must be a list of integers.");
+                throw new PubSubException(fieldName + " must be a list of integers.");
             }
             partitionList.add(new TopicPartition(topicName, ((Long) partition).intValue()));
         }
@@ -160,16 +163,13 @@ public class KafkaPubSub extends PubSub {
      * @return The Subscriber reading from the appropriate topic/partitions.
      */
     private Subscriber getSubscriber(List<TopicPartition> partitions, String topicName) throws PubSubException {
-        Map<String, Object> properties = getProperties(CONSUMER_NAMESPACE, KAFKA_CONSUMER_PROPERTIES);
-
         // Get the PubSub Consumer specific properties
-        Number maxUnackedMessages = getRequiredConfig(Number.class, KafkaConfig.MAX_UNCOMMITTED_MESSAGES);
+        Number maxUnackedMessages = config.getAs(KafkaConfig.MAX_UNCOMMITTED_MESSAGES, Number.class);
 
         // Is autocommit on
-        String autoCommit = getRequiredConfig(String.class, KafkaConfig.ENABLE_AUTO_COMMIT);
-        boolean enableAutoCommit = KafkaConfig.TRUE.equalsIgnoreCase(autoCommit);
+        boolean enableAutoCommit = config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, Boolean.class);
 
-        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(properties);
+        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(consumerProperties);
         // Subscribe to the topic if partitions are not set in the config.
         if (partitions == null) {
             consumer.subscribe(Collections.singleton(topicName));
@@ -180,23 +180,6 @@ public class KafkaPubSub extends PubSub {
     }
 
     private KafkaProducer<String, byte[]> getDummyProducer() throws PubSubException {
-        Map<String, Object> properties = getProperties(PRODUCER_NAMESPACE, KAFKA_PRODUCER_PROPERTIES);
-        return new KafkaProducer<>(properties);
-    }
-
-    private Map<String, Object> getProperties(String namespace, Set<String> required) throws PubSubException {
-        // Validate we have all required properties
-        List<String> missing = required.stream().filter(key -> config.get(key) == null).collect(Collectors.toList());
-        if (!missing.isEmpty()) {
-            throw new PubSubException("Required properties were not found: " + missing);
-        }
-
-        // Get all common Kafka properties and strip the Kafka namespace
-        Map<String, Object> commonProperties = config.getAllWithPrefix(Optional.of(KAFKA_PROPERTIES), KAFKA_NAMESPACE, true);
-        // Get all properties with the namespace and strip it
-        Map<String, Object> properties = config.getAllWithPrefix(Optional.empty(), namespace, true);
-        properties.putAll(commonProperties);
-
-        return properties;
+        return new KafkaProducer<>(producerProperties);
     }
 }

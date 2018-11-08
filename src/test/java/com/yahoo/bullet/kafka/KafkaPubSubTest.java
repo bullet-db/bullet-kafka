@@ -28,6 +28,8 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.anyString;
 
 public class KafkaPubSubTest {
+    private static final String MAX_BLOCK_MS = KafkaConfig.PRODUCER_NAMESPACE + "max.block.ms";
+
     List<TopicPartition> requestPartitions = Arrays.asList(new TopicPartition("bullet.queries", 0),
                                                            new TopicPartition("bullet.queries", 1),
                                                            new TopicPartition("bullet.queries", 2),
@@ -102,12 +104,11 @@ public class KafkaPubSubTest {
         List<Publisher> publishers = kafkaPubSub.getPublishers(10);
         Assert.assertEquals(publishers.size(), 10);
         for (Publisher publisher : publishers) {
-            Assert.assertEquals(publisher.getClass(), KafkaResponsePublisher.class);
+            Assert.assertTrue(publisher instanceof KafkaResponsePublisher);
         }
     }
 
-    @Test(expectedExceptions = PubSubException.class,
-          expectedExceptionsMessageRegExp = ".*" + KafkaConfig.BOOTSTRAP_SERVERS + ".*")
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*" + KafkaConfig.BOOTSTRAP_SERVERS + ".*")
     public void testMissingRequiredProperties() throws Exception {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
@@ -154,7 +155,7 @@ public class KafkaPubSubTest {
     }
 
     @Test
-    public void testSubscriberPartitionsAllocationWhenInsuffucient() throws Exception {
+    public void testSubscriberPartitionsAllocationWhenInsufficient() throws Exception {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
@@ -162,8 +163,8 @@ public class KafkaPubSubTest {
         // Test that every subscriber is allocated one partition and the size of the list is the allocated number of partitions.
         Assert.assertEquals(subscriber.size(), 4);
         Assert.assertTrue(subscriber.stream()
-                          .mapToInt(x -> ((KafkaSubscriber) x).getConsumer().assignment().size())
-                          .allMatch(x -> x == 1));
+                                    .mapToInt(x -> ((KafkaSubscriber) x).getConsumer().assignment().size())
+                                    .allMatch(x -> x == 1));
     }
 
     @Test
@@ -174,8 +175,8 @@ public class KafkaPubSubTest {
         List<Subscriber> subscriber = kafkaPubSub.getSubscribers(3);
         Assert.assertEquals(subscriber.size(), 2);
         Assert.assertTrue(subscriber.stream()
-                          .mapToInt(x -> ((KafkaSubscriber) x).getConsumer().assignment().size())
-                          .allMatch(x -> x == 2));
+                                    .mapToInt(x -> ((KafkaSubscriber) x).getConsumer().assignment().size())
+                                    .allMatch(x -> x == 2));
     }
 
     @Test(expectedExceptions = RuntimeException.class)
@@ -183,7 +184,7 @@ public class KafkaPubSubTest {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         config.set(KafkaConfig.REQUEST_PARTITIONS, null);
-        config.set(KafkaConfig.MAX_BLOCK_MS, 50);
+        config.set(MAX_BLOCK_MS, 50);
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         kafkaPubSub.getPublisher();
     }
@@ -193,7 +194,7 @@ public class KafkaPubSubTest {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         config.set(KafkaConfig.RESPONSE_PARTITIONS, null);
-        config.set(KafkaConfig.MAX_BLOCK_MS, 50);
+        config.set(MAX_BLOCK_MS, 50);
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         kafkaPubSub.getPublisher();
     }

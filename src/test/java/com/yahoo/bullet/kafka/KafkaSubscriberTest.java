@@ -115,17 +115,6 @@ public class KafkaSubscriberTest {
         Assert.assertTrue(getAndCheck(randomMessage, randomID, subscriber));
     }
 
-    @Test
-    public void testMalformedMessage() throws PubSubException {
-        String randomString = UUID.randomUUID().toString();
-        KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
-        when(consumer.poll(any())).thenReturn(makeConsumerRecords(randomString, randomString))
-                                  .thenReturn(makeConsumerRecords(randomString, new PubSubMessage(randomString, randomString)));
-        Subscriber subscriber = new KafkaSubscriber(consumer, 100);
-        PubSubMessage message = subscriber.receive();
-        Assert.assertNull(message);
-    }
-
     @Test(expectedExceptions = PubSubException.class)
     public void testKafkaError() throws PubSubException {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);

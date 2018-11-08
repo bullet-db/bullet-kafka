@@ -23,8 +23,10 @@ public class KafkaResponsePublisher implements Publisher {
     @Override
     public void send(PubSubMessage message) throws PubSubException {
         TopicPartition responsePartition = getRouteInfo(message);
-        producer.send(new ProducerRecord<>(responsePartition.topic(), responsePartition.partition(),
-                      message.getId(), SerializerDeserializer.toBytes(message)));
+        producer.send(new ProducerRecord<>(responsePartition.topic(),
+                                           responsePartition.partition(),
+                                           message.getId(),
+                                           SerializerDeserializer.toBytes(message)));
     }
 
     @Override
