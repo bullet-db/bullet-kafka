@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,7 +40,19 @@ public class KafkaPubSubTest {
                                                             new TopicPartition("bullet.responses", 7));
 
     @Test
-    public void testQuerySubmissionPartitions() throws IOException, PubSubException {
+    public void testSwitchContext() throws PubSubException {
+        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
+        KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
+
+        Assert.assertEquals(kafkaPubSub.getContext(), PubSub.Context.QUERY_SUBMISSION);
+
+        kafkaPubSub.switchContext(PubSub.Context.QUERY_PROCESSING, config);
+        Assert.assertEquals(kafkaPubSub.getContext(), PubSub.Context.QUERY_PROCESSING);
+    }
+
+    @Test
+    public void testQuerySubmissionPartitions() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
@@ -58,7 +69,7 @@ public class KafkaPubSubTest {
     }
 
     @Test
-    public void testQueryProcessingPartitions() throws IOException, PubSubException {
+    public void testQueryProcessingPartitions() throws PubSubException {
         BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));

@@ -45,7 +45,16 @@ public class KafkaPubSub extends PubSub {
         super(pubSubConfig);
         // Copy settings from pubSubConfig.
         config = new KafkaConfig(pubSubConfig);
+        initialize();
+    }
 
+    @Override
+    public void switchContext(Context context, BulletConfig config) throws PubSubException {
+        super.switchContext(context, config);
+        initialize();
+    }
+
+    private void initialize() {
         queryTopicName = config.getAs(KafkaConfig.REQUEST_TOPIC_NAME, String.class);
         responseTopicName  = config.getAs(KafkaConfig.RESPONSE_TOPIC_NAME, String.class);
         topic = (context == Context.QUERY_PROCESSING) ? queryTopicName : responseTopicName;

@@ -98,6 +98,11 @@ public class KafkaConfig extends BulletConfig {
         // Load default Kafka settings. Merge additional settings in Config
         super(DEFAULT_KAFKA_CONFIGURATION);
         merge(config);
+    }
+
+    @Override
+    public BulletConfig validate() {
         VALIDATOR.validate(this);
+        return this;
     }
 }
