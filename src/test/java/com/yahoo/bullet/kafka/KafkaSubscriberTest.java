@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +43,7 @@ public class KafkaSubscriberTest {
     private KafkaConsumer<String, byte[]> makeMockConsumer(String randomID, String randomMessage) {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
         ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage));
-        when(consumer.poll(anyLong())).thenReturn(records).thenReturn(new ConsumerRecords<>(new HashMap<>()));
+        when(consumer.poll(any())).thenReturn(records).thenReturn(new ConsumerRecords<>(new HashMap<>()));
         return consumer;
     }
 
@@ -115,27 +115,16 @@ public class KafkaSubscriberTest {
         Assert.assertTrue(getAndCheck(randomMessage, randomID, subscriber));
     }
 
-    @Test
-    public void testMalformedMessage() throws PubSubException {
-        String randomString = UUID.randomUUID().toString();
-        KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
-        when(consumer.poll(anyLong())).thenReturn(makeConsumerRecords(randomString, randomString))
-                                      .thenReturn(makeConsumerRecords(randomString, new PubSubMessage(randomString, randomString)));
-        Subscriber subscriber = new KafkaSubscriber(consumer, 100);
-        PubSubMessage message = subscriber.receive();
-        Assert.assertNull(message);
-    }
-
     @Test(expectedExceptions = PubSubException.class)
     public void testKafkaError() throws PubSubException {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
-        when(consumer.poll(anyLong())).thenThrow(new KafkaException());
+        when(consumer.poll(any())).thenThrow(new KafkaException());
         Subscriber subscriber = new KafkaSubscriber(consumer, 100);
         subscriber.receive();
     }
 
     @Test
-    public void testClose() {
+    public void testClose() throws Exception {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
         Subscriber subscriber = new KafkaSubscriber(consumer, 100);
         subscriber.close();
