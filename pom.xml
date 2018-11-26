@@ -4,13 +4,13 @@
 
     <groupId>com.yahoo.bullet</groupId>
     <artifactId>bullet-kafka</artifactId>
-    <version>0.3.2</version>
+    <version>0.3.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>bullet-kafka</name>
 
     <scm>
         <developerConnection>scm:git:ssh://git@github.com/bullet-db/bullet-kafka.git</developerConnection>
-        <tag>bullet-kafka-0.3.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
