@@ -68,10 +68,10 @@ public class KafkaPubSub extends PubSub {
         Map<String, Object> commonProperties = config.getAllWithPrefix(Optional.of(KafkaConfig.COMMON_PROPERTIES), KAFKA_NAMESPACE, true);
         producerProperties = config.getAllWithPrefix(Optional.empty(), PRODUCER_NAMESPACE, true);
         producerProperties.putAll(commonProperties);
-        log.info("Producer properties: \n{}", producerProperties);
+        log.info("Producer properties:\n{}", producerProperties);
         consumerProperties = config.getAllWithPrefix(Optional.empty(), CONSUMER_NAMESPACE, true);
         consumerProperties.putAll(commonProperties);
-        log.info("Consumer properties: \n{}", consumerProperties);
+        log.info("Consumer properties:\n{}", consumerProperties);
     }
 
     @Override
