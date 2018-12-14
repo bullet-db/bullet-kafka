@@ -6,7 +6,7 @@ bullet.pubsub.kafka.bootstrap.servers: "localhost:9091"
 bullet.pubsub.kafka.connections.max.idle.ms: "-1"
 
 # Kafka Producer properties
-# These are passed to KafkaProducer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.producer.".
+# These are passed to KafkaProducer. You can add or override other Kafka properties by prefixing the property with "bullet.pubsub.kafka.producer.".
 bullet.pubsub.kafka.producer.acks: "all"
 bullet.pubsub.kafka.producer.retries: "5"
 bullet.pubsub.kafka.producer.batch.size: "65536"
@@ -18,7 +18,7 @@ bullet.pubsub.kafka.producer.value.serializer: "org.apache.kafka.common.serializ
 bullet.pubsub.kafka.producer.max.block.ms: "50000"
 
 # Kafka Consumer properties
-# These are passed to KafkaConsumer. You can add other Kafka properties by prefixing the property with "bullet.pubsub.kafka.consumer.".
+# These are passed to KafkaConsumer. You can add or override other Kafka properties by prefixing the property with "bullet.pubsub.kafka.consumer.".
 bullet.pubsub.kafka.consumer.group.id: "bullet-query-consumer"
 bullet.pubsub.kafka.consumer.heartbeat.interval.ms: "3000"
 bullet.pubsub.kafka.consumer.enable.auto.commit: "true"

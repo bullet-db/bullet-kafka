@@ -9,11 +9,19 @@ import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.common.Config;
 import com.yahoo.bullet.common.Validator;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class KafkaConfig extends BulletConfig {
     public static final String KAFKA_NAMESPACE = "bullet.pubsub.kafka" + DELIMITER;
 
-    // Common Kafka properties
+    // Common managed Kafka properties
     public static final String BOOTSTRAP_SERVERS = KAFKA_NAMESPACE + "bootstrap.servers";
+    public static final String CONNECTIONS_MAX_IDLE_MS = KAFKA_NAMESPACE + "connections.max.idle.ms";
+
+    public static final Set<String> COMMON_PROPERTIES =
+        new HashSet<>(Arrays.asList(BOOTSTRAP_SERVERS, CONNECTIONS_MAX_IDLE_MS));
 
     public static final String PRODUCER_NAMESPACE = KAFKA_NAMESPACE + "producer" + DELIMITER;
     // Producer specific properties
@@ -37,8 +45,10 @@ public class KafkaConfig extends BulletConfig {
     public static final String MAX_UNCOMMITTED_MESSAGES = KAFKA_NAMESPACE + "subscriber.max.uncommitted.messages";
 
     // Defaults
+    private static String TRUE = "true";
+    private static String FALSE = "false";
     public static final String DEFAULT_KAFKA_CONFIGURATION = "bullet_kafka_defaults.yaml";
-    public static final boolean DEFAULT_ENABLE_AUTO_COMMIT = true;
+    public static final String DEFAULT_ENABLE_AUTO_COMMIT = TRUE;
 
     private static final Validator VALIDATOR = BulletConfig.getValidator();
 
@@ -76,7 +86,8 @@ public class KafkaConfig extends BulletConfig {
                  .checkIf(Validator::isString)
                  .orFail();
         VALIDATOR.define(ENABLE_AUTO_COMMIT)
-                 .checkIf(Validator::isBoolean)
+                 .checkIf(Validator::isString)
+                 .checkIf(Validator.isIn(TRUE, FALSE))
                  .defaultTo(DEFAULT_ENABLE_AUTO_COMMIT);
     }
 
