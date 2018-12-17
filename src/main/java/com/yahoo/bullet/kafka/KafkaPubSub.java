@@ -64,6 +64,12 @@ public class KafkaPubSub extends PubSub {
         partitions = (context == Context.QUERY_PROCESSING) ? queryPartitions : responsePartitions;
 
         Map<String, Object> commonProperties = config.getAllWithPrefix(Optional.empty(), KAFKA_NAMESPACE, true);
+        commonProperties = commonProperties.entrySet()
+                                           .stream()
+                                           .filter(entry -> !entry.getKey().startsWith("producer.") &&
+                                                            !entry.getKey().startsWith("consumer.") &&
+                                                            entry.getValue() != null)
+                                           .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         producerProperties = config.getAllWithPrefix(Optional.empty(), PRODUCER_NAMESPACE, true);
         producerProperties.putAll(commonProperties);
         consumerProperties = config.getAllWithPrefix(Optional.empty(), CONSUMER_NAMESPACE, true);
@@ -173,7 +179,7 @@ public class KafkaPubSub extends PubSub {
         Number maxUnackedMessages = config.getAs(KafkaConfig.MAX_UNCOMMITTED_MESSAGES, Number.class);
 
         // Is autocommit on
-        boolean enableAutoCommit = config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, Boolean.class);
+        boolean enableAutoCommit = Boolean.valueOf(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class));
 
         KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(consumerProperties);
         // Subscribe to the topic if partitions are not set in the config.

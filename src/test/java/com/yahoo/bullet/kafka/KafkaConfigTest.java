@@ -54,4 +54,20 @@ public class KafkaConfigTest {
         Assert.assertTrue(kafkaProperties.containsKey(strippedName));
         Assert.assertEquals(kafkaProperties.get(strippedName), "bullet.queries");
     }
+
+    @Test
+    public void testIsStringBoolean() {
+        KafkaConfig config = new KafkaConfig("");
+        config.set(KafkaConfig.ENABLE_AUTO_COMMIT, "TRUE");
+        config.validate();
+        Assert.assertEquals(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class), "TRUE");
+
+        config.set(KafkaConfig.ENABLE_AUTO_COMMIT, "FALSE");
+        config.validate();
+        Assert.assertEquals(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class), "FALSE");
+
+        config.set(KafkaConfig.ENABLE_AUTO_COMMIT, "");
+        config.validate();
+        Assert.assertEquals(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class), KafkaConfig.DEFAULT_ENABLE_AUTO_COMMIT);
+    }
 }

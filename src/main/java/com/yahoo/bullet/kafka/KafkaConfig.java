@@ -38,7 +38,7 @@ public class KafkaConfig extends BulletConfig {
 
     // Defaults
     public static final String DEFAULT_KAFKA_CONFIGURATION = "bullet_kafka_defaults.yaml";
-    public static final boolean DEFAULT_ENABLE_AUTO_COMMIT = true;
+    public static final String DEFAULT_ENABLE_AUTO_COMMIT = "true";
 
     private static final Validator VALIDATOR = BulletConfig.getValidator();
 
@@ -76,7 +76,8 @@ public class KafkaConfig extends BulletConfig {
                  .checkIf(Validator::isString)
                  .orFail();
         VALIDATOR.define(ENABLE_AUTO_COMMIT)
-                 .checkIf(Validator::isBoolean)
+                 .checkIf(Validator::isString)
+                 .checkIf(KafkaConfig::isStringBoolean)
                  .defaultTo(DEFAULT_ENABLE_AUTO_COMMIT);
     }
 
@@ -104,5 +105,10 @@ public class KafkaConfig extends BulletConfig {
     public BulletConfig validate() {
         VALIDATOR.validate(this);
         return this;
+    }
+
+    private static Boolean isStringBoolean(Object object) {
+        String bool = (String) object;
+        return bool.equalsIgnoreCase(Boolean.TRUE.toString()) || bool.equalsIgnoreCase(Boolean.FALSE.toString());
     }
 }
