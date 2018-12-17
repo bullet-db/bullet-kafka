@@ -10,6 +10,7 @@ import com.yahoo.bullet.pubsub.PubSub;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.Publisher;
 import com.yahoo.bullet.pubsub.Subscriber;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.TopicPartition;
@@ -25,6 +26,7 @@ import static com.yahoo.bullet.kafka.KafkaConfig.CONSUMER_NAMESPACE;
 import static com.yahoo.bullet.kafka.KafkaConfig.KAFKA_NAMESPACE;
 import static com.yahoo.bullet.kafka.KafkaConfig.PRODUCER_NAMESPACE;
 
+@Slf4j
 public class KafkaPubSub extends PubSub {
     private List<TopicPartition> queryPartitions;
     private List<TopicPartition> responsePartitions;
@@ -63,11 +65,13 @@ public class KafkaPubSub extends PubSub {
         responsePartitions = parsePartitionsFor(responseTopicName, KafkaConfig.RESPONSE_PARTITIONS);
         partitions = (context == Context.QUERY_PROCESSING) ? queryPartitions : responsePartitions;
 
-        Map<String, Object> commonProperties = config.getAllWithPrefix(Optional.empty(), KAFKA_NAMESPACE, true);
+        Map<String, Object> commonProperties = config.getAllWithPrefix(Optional.of(KafkaConfig.COMMON_PROPERTIES), KAFKA_NAMESPACE, true);
         producerProperties = config.getAllWithPrefix(Optional.empty(), PRODUCER_NAMESPACE, true);
         producerProperties.putAll(commonProperties);
+        log.info("Producer properties:\n{}", producerProperties);
         consumerProperties = config.getAllWithPrefix(Optional.empty(), CONSUMER_NAMESPACE, true);
         consumerProperties.putAll(commonProperties);
+        log.info("Consumer properties:\n{}", consumerProperties);
     }
 
     @Override
@@ -132,7 +136,6 @@ public class KafkaPubSub extends PubSub {
      * @param topicName The name of the topic to get partitions for.
      * @param fieldName The key corresponding to the partition list in the YAML file.
      * @return {@link List} of {@link TopicPartition} values assigned in {@link KafkaConfig}.
-     * @throws PubSubException if the setting for partitions is malformed.
      */
     private List<TopicPartition> parsePartitionsFor(String topicName, String fieldName) {
         if (config.get(fieldName) == null) {
@@ -173,7 +176,7 @@ public class KafkaPubSub extends PubSub {
         Number maxUnackedMessages = config.getAs(KafkaConfig.MAX_UNCOMMITTED_MESSAGES, Number.class);
 
         // Is autocommit on
-        boolean enableAutoCommit = config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, Boolean.class);
+        boolean enableAutoCommit = Boolean.valueOf(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class));
 
         KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(consumerProperties);
         // Subscribe to the topic if partitions are not set in the config.
