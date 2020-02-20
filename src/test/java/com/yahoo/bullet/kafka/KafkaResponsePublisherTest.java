@@ -29,7 +29,7 @@ public class KafkaResponsePublisherTest {
         TopicPartition randomTopicPartition = new TopicPartition(TestUtils.getRandomString(), 0);
         String randomID = TestUtils.getRandomString();
         Publisher publisher = new KafkaResponsePublisher(mockProducer);
-        publisher.send(new PubSubMessage(randomID, "", new Metadata(null, randomTopicPartition)));
+        publisher.send(new PubSubMessage(randomID, "", new KafkaMetadata(randomTopicPartition)));
         Map<String, Set<TopicPartition>> sentMessages = messageStore.groupSendPartitionById();
 
         Assert.assertEquals(sentMessages.size(), 1);

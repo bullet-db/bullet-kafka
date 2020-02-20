@@ -50,7 +50,7 @@ public class KafkaSubscriberTest {
     private boolean getAndCheck(String randomMessage, String randomID, KafkaSubscriber subscriber) throws PubSubException {
         PubSubMessage message = subscriber.receive();
         Assert.assertNotNull(message);
-        subscriber.commit(message.getId(), message.getSequence());
+        subscriber.commit(message.getId());
         // Test if correct message is received.
         boolean result = (message.getContent().equals(randomMessage) && message.getId().equals(randomID));
         // Test if next message is null.

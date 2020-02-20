@@ -5,10 +5,10 @@
  */
 package com.yahoo.bullet.kafka;
 
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
-
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.TopicPartition;
 import org.mockito.Mockito;
@@ -16,8 +16,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -42,22 +42,24 @@ public class KafkaQueryPublisherTest {
     }
 
     @Test
-    public void testUniqueRequestPartitionPerId() throws Exception {
+    public void testUniqueRequestPartitionPerId() {
         for (Set<TopicPartition> value : messageStore.groupSendPartitionById().values()) {
             Assert.assertTrue(value.size() <= 1);
         }
     }
 
     @Test
-    public void testUniqueResponsePartitionPerId() throws Exception {
+    public void testUniqueResponsePartitionPerId() {
         for (Set<TopicPartition> value : messageStore.groupReceivePartitionById().values()) {
             Assert.assertTrue(value.size() <= 1);
         }
     }
 
     @Test(expectedExceptions = PubSubException.class)
-    public void testSendMessageWithNullMetadata() throws Exception {
-        publisher.send(new PubSubMessage("foo", "bar"));
+    public void testSendMessageWithBadMetadata() throws Exception {
+        Metadata metadata = Mockito.mock(Metadata.class);
+        Mockito.doThrow(new RuntimeException("Testing")).when(metadata).getContent();
+        publisher.send(new PubSubMessage("foo", "bar", metadata));
     }
 
     @Test

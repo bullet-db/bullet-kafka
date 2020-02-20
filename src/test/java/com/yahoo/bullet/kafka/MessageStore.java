@@ -51,7 +51,7 @@ public class MessageStore {
     }
 
     public Map<TopicPartition, Set<String>> groupIdByReceivePartition() {
-        return TestUtils.groupTriples(messages, Triple::getReceivePartition, x->x.getMessage().getId());
+        return TestUtils.groupTriples(messages, Triple::getReceivePartition, x -> x.getMessage().getId());
     }
 
     public void clear() {
