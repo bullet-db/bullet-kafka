@@ -46,11 +46,11 @@ public class MessageStore {
         return TestUtils.groupTriples(messages, x -> x.getMessage().getId(), Triple::getReceivePartition);
     }
 
-    public Map<TopicPartition, Set<String>> groupIdBySendPartition() {
+    public Map<TopicPartition, Set<String>> groupIDBySendPartition() {
         return TestUtils.groupTriples(messages, Triple::getSendPartition, x -> x.getMessage().getId());
     }
 
-    public Map<TopicPartition, Set<String>> groupIdByReceivePartition() {
+    public Map<TopicPartition, Set<String>> groupIDByReceivePartition() {
         return TestUtils.groupTriples(messages, Triple::getReceivePartition, x -> x.getMessage().getId());
     }
 
