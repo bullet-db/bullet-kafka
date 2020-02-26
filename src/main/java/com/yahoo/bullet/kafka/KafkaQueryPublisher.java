@@ -6,7 +6,6 @@
 package com.yahoo.bullet.kafka;
 
 import com.yahoo.bullet.common.SerializerDeserializer;
-import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
@@ -32,25 +31,27 @@ public class KafkaQueryPublisher implements Publisher {
     private void setRouteData(PubSubMessage message) throws PubSubException {
         try {
             TopicPartition responsePartition = getPartition(receivePartitions, message);
-            message.getMetadata().setContent(responsePartition);
+            message.setMetadata(message.hasMetadata() ? new KafkaMetadata(message.getMetadata(), responsePartition) :
+                                                        new KafkaMetadata(responsePartition));
         } catch (Exception e) {
             throw new PubSubException("Could not set route metadata.", e);
         }
     }
 
     @Override
-    public void send(String id, String content) throws PubSubException {
-        send(new PubSubMessage(id, content, new Metadata()));
+    public PubSubMessage send(String id, String content) throws PubSubException {
+        return send(new PubSubMessage(id, content));
     }
 
     @Override
-    public void send(PubSubMessage message) throws PubSubException {
+    public PubSubMessage send(PubSubMessage message) throws PubSubException {
         TopicPartition requestPartition = getPartition(writePartitions, message);
         setRouteData(message);
         producer.send(new ProducerRecord<>(requestPartition.topic(),
                                            requestPartition.partition(),
                                            message.getId(),
                                            SerializerDeserializer.toBytes(message)));
+        return message;
     }
 
     @Override

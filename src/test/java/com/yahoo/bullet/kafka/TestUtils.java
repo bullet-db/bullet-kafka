@@ -44,7 +44,7 @@ public class TestUtils {
 
     public static TopicPartition getMetadataPartition(ProducerRecord<String, byte[]> record) {
         PubSubMessage message = SerializerDeserializer.fromBytes(record.value());
-        return (TopicPartition) message.getMetadata().getContent();
+        return ((KafkaMetadata) message.getMetadata()).getTopicPartition();
     }
 
     public static String getMessageID(ProducerRecord<String, byte[]> record) {

@@ -21,12 +21,13 @@ public class KafkaResponsePublisher implements Publisher {
     private final KafkaProducer<String, byte[]> producer;
 
     @Override
-    public void send(PubSubMessage message) throws PubSubException {
+    public PubSubMessage send(PubSubMessage message) throws PubSubException {
         TopicPartition responsePartition = getRouteInfo(message);
         producer.send(new ProducerRecord<>(responsePartition.topic(),
                                            responsePartition.partition(),
                                            message.getId(),
                                            SerializerDeserializer.toBytes(message)));
+        return message;
     }
 
     @Override
@@ -36,7 +37,8 @@ public class KafkaResponsePublisher implements Publisher {
 
     private TopicPartition getRouteInfo(PubSubMessage message) throws PubSubException {
         try {
-            return (TopicPartition) Objects.requireNonNull(message.getMetadata().getContent());
+            KafkaMetadata metadata = (KafkaMetadata) message.getMetadata();
+            return Objects.requireNonNull(metadata.getTopicPartition());
         } catch (Exception e) {
             throw new PubSubException("Invalid route information", e);
         }
