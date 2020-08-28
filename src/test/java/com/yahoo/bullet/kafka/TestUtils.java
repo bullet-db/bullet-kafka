@@ -33,7 +33,7 @@ public class TestUtils {
             randomId = UUID.randomUUID().toString();
             for (int j = 0; j < messageCount; j++) {
                 randomMessage = UUID.randomUUID().toString();
-                publisher.send(randomId, randomMessage);
+                publisher.send(randomId, randomMessage.getBytes(PubSubMessage.CHARSET));
             }
         }
     }

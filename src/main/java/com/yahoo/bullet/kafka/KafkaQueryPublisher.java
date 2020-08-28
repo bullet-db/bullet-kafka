@@ -39,7 +39,7 @@ public class KafkaQueryPublisher implements Publisher {
     }
 
     @Override
-    public PubSubMessage send(String id, String content) throws PubSubException {
+    public PubSubMessage send(String id, byte[] content) throws PubSubException {
         return send(new PubSubMessage(id, content));
     }
 
