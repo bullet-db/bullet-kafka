@@ -36,4 +36,16 @@ public class KafkaMetadataTest {
         Assert.assertSame(metadata.getTopicPartition(), topicPartition);
         Assert.assertEquals(metadata.getTopicPartition(), new TopicPartition("foo", 4));
     }
+
+    @Test
+    public void testCopy() {
+        TopicPartition topicPartition = new TopicPartition("foo", 4);
+        Metadata custom = new Metadata(Metadata.Signal.CUSTOM, "bar");
+        KafkaMetadata metadata = new KafkaMetadata(custom, topicPartition);
+        KafkaMetadata copy = (KafkaMetadata) metadata.copy();
+        Assert.assertNotEquals(metadata, copy);
+        Assert.assertEquals(metadata.getSignal(), copy.getSignal());
+        Assert.assertEquals(metadata.getContent(), copy.getContent());
+        Assert.assertEquals(metadata.getTopicPartition(), copy.getTopicPartition());
+    }
 }
