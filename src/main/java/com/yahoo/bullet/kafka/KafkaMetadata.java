@@ -37,4 +37,9 @@ public class KafkaMetadata extends Metadata implements Serializable {
     public KafkaMetadata(TopicPartition topicPartition) {
         this.topicPartition = topicPartition;
     }
+
+    @Override
+    public Metadata copy() {
+        return new KafkaMetadata(this, topicPartition);
+    }
 }

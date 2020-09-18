@@ -42,7 +42,7 @@ public class KafkaSubscriberTest {
 
     private KafkaConsumer<String, byte[]> makeMockConsumer(String randomID, String randomMessage) {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
-        ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage));
+        ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage, null));
         when(consumer.poll(any())).thenReturn(records).thenReturn(new ConsumerRecords<>(new HashMap<>()));
         return consumer;
     }
@@ -52,7 +52,7 @@ public class KafkaSubscriberTest {
         Assert.assertNotNull(message);
         subscriber.commit(message.getId());
         // Test if correct message is received.
-        boolean result = (message.getContent().equals(randomMessage) && message.getId().equals(randomID));
+        boolean result = (message.getContentAsString().equals(randomMessage) && message.getId().equals(randomID));
         // Test if next message is null.
         message = subscriber.receive();
         return result && (message == null);
