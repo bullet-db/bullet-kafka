@@ -35,7 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <bullet.core.version>1.0.0</bullet.core.version>
+        <bullet.core.version>1.1.0</bullet.core.version>
         <kafka.clients.version>2.3.0</kafka.clients.version>
     </properties>
 
@@ -113,7 +113,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>8.26</version>
+                        <version>8.29</version>
                     </dependency>
                 </dependencies>
             </plugin>

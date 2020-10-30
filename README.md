@@ -1,6 +1,6 @@
 # Bullet Kafka
 
-[![Build Status](https://travis-ci.org/bullet-db/bullet-kafka.svg?branch=master)](https://travis-ci.org/bullet-db/bullet-kafka) [![Coverage Status](https://coveralls.io/repos/github/bullet-db/bullet-kafka/badge.svg?branch=master)](https://coveralls.io/github/bullet-db/bullet-kafka?branch=master) [![Download](https://api.bintray.com/packages/yahoo/maven/bullet-kafka/images/download.svg) ](https://bintray.com/yahoo/maven/bullet-kafka/_latestVersion)
+[![Build Status](https://travis-ci.com/bullet-db/bullet-kafka.svg?branch=master)](https://travis-ci.com/bullet-db/bullet-kafka) [![Coverage Status](https://coveralls.io/repos/github/bullet-db/bullet-kafka/badge.svg?branch=master)](https://coveralls.io/github/bullet-db/bullet-kafka?branch=master) [![Download](https://api.bintray.com/packages/yahoo/maven/bullet-kafka/images/download.svg) ](https://bintray.com/yahoo/maven/bullet-kafka/_latestVersion)
 
 ## Introduction
 
