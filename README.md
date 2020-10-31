@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This project implements Bullet PubSub through [Kafka](https://kafka.apache.org). This allows you to plugin Kafka as your pubsub layer for transporting Bullet queries and results to the Bullet Web Service and the Backend.
+This project implements an instance of the Bullet PubSub using [Kafka](https://kafka.apache.org). This allows you to plugin Kafka as your pubsub layer for transporting Bullet queries and results to the Bullet Web Service and the Backend.
 
 ## Documentation
 
