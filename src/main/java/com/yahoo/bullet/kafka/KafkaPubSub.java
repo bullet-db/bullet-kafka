@@ -142,9 +142,9 @@ public class KafkaPubSub extends PubSub {
             return null;
         }
         List<TopicPartition> partitionList = new ArrayList<>();
-        List<Long> partitionObjectList = config.getAs(fieldName, List.class);
-        for (Object partition : partitionObjectList) {
-            partitionList.add(new TopicPartition(topicName, ((Long) partition).intValue()));
+        List<Number> partitionObjectList = config.getAs(fieldName, List.class);
+        for (Number partition : partitionObjectList) {
+            partitionList.add(new TopicPartition(topicName, partition.intValue()));
         }
         return partitionList;
     }
@@ -176,7 +176,7 @@ public class KafkaPubSub extends PubSub {
         Number maxUnackedMessages = config.getAs(KafkaConfig.MAX_UNCOMMITTED_MESSAGES, Number.class);
 
         // Is autocommit on
-        boolean enableAutoCommit = Boolean.valueOf(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class));
+        boolean enableAutoCommit = Boolean.parseBoolean(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class));
 
         KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(consumerProperties);
         // Subscribe to the topic if partitions are not set in the config.
@@ -188,7 +188,7 @@ public class KafkaPubSub extends PubSub {
         return new KafkaSubscriber(consumer, maxUnackedMessages.intValue(), !enableAutoCommit);
     }
 
-    private KafkaProducer<String, byte[]> getDummyProducer() throws PubSubException {
+    private KafkaProducer<String, byte[]> getDummyProducer() {
         return new KafkaProducer<>(producerProperties);
     }
 }

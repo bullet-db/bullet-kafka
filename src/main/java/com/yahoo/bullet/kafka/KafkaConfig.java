@@ -63,11 +63,11 @@ public class KafkaConfig extends BulletConfig {
                  .checkIf(Validator::isString)
                  .orFail();
         VALIDATOR.define(REQUEST_PARTITIONS)
-                 .checkIf(Validator.isListOfType(Long.class))
+                 .checkIf(Validator.isListOfType(Integer.class))
                  .unless(Validator::isNull)
                  .orFail();
         VALIDATOR.define(RESPONSE_PARTITIONS)
-                 .checkIf(Validator.isListOfType(Long.class))
+                 .checkIf(Validator.isListOfType(Integer.class))
                  .unless(Validator::isNull)
                  .orFail();
         VALIDATOR.define(KEY_SERIALIZER)
