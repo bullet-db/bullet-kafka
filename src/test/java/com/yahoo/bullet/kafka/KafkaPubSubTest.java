@@ -41,7 +41,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testSwitchContext() throws PubSubException {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
 
@@ -53,7 +53,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testQuerySubmissionPartitions() throws PubSubException {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
 
@@ -70,7 +70,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testQueryProcessingPartitions() throws PubSubException {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
 
@@ -82,7 +82,7 @@ public class KafkaPubSubTest {
 
     @Test(expectedExceptions = PubSubException.class)
     public void testIllegalRequestPartitions() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         config.set(KafkaConfig.REQUEST_PARTITIONS, "");
         config.set(BulletConfig.PUBSUB_CLASS_NAME, "com.yahoo.bullet.kafka.KafkaPubSub");
@@ -91,7 +91,7 @@ public class KafkaPubSubTest {
 
     @Test(expectedExceptions = PubSubException.class)
     public void testIllegalResponsePartitions() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         config.set(KafkaConfig.RESPONSE_PARTITIONS, "");
         config.set(BulletConfig.PUBSUB_CLASS_NAME, "com.yahoo.bullet.kafka.KafkaPubSub");
@@ -100,7 +100,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testGetSubscribers() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         List<Subscriber> subscribers = kafkaPubSub.getSubscribers(10);
@@ -109,7 +109,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testGetPublishers() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         List<Publisher> publishers = kafkaPubSub.getPublishers(10);
@@ -121,7 +121,7 @@ public class KafkaPubSubTest {
 
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*" + KafkaConfig.BOOTSTRAP_SERVERS + ".*")
     public void testMissingRequiredProperties() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaConfig kafkaConfig = new KafkaConfig(config);
         kafkaConfig.set(KafkaConfig.BOOTSTRAP_SERVERS, null);
@@ -131,7 +131,7 @@ public class KafkaPubSubTest {
 
     @Test(expectedExceptions = PubSubException.class)
     public void testMalformedPartitionList() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_malformed_config.yaml");
+        BulletConfig config = new BulletConfig("test_malformed_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         config.set(BulletConfig.PUBSUB_CLASS_NAME, "com.yahoo.bullet.kafka.KafkaPubSub");
         PubSub.from(config);
@@ -139,7 +139,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testNoResponsePartitions() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config_no_partitions.yaml");
+        BulletConfig config = new BulletConfig("test_config_no_partitions.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         KafkaSubscriber subscriber = (KafkaSubscriber) kafkaPubSub.getSubscriber();
@@ -148,7 +148,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testNoRequestPartitions() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config_no_partitions.yaml");
+        BulletConfig config = new BulletConfig("test_config_no_partitions.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         KafkaSubscriber subscriber = (KafkaSubscriber) kafkaPubSub.getSubscriber();
@@ -157,7 +157,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testSubscriberPartitionAllocationWhenExact() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         List<Subscriber> subscriber = kafkaPubSub.getSubscribers(4);
@@ -167,7 +167,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testSubscriberPartitionsAllocationWhenInsufficient() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         List<Subscriber> subscriber = kafkaPubSub.getSubscribers(5);
@@ -180,7 +180,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testSubscriberPartitionsAllocationWhenInExcess() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         List<Subscriber> subscriber = kafkaPubSub.getSubscribers(3);
@@ -192,7 +192,7 @@ public class KafkaPubSubTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testNoQueryPartitionsWhenUnableToReachKafka() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         config.set(KafkaConfig.REQUEST_PARTITIONS, null);
         config.set(MAX_BLOCK_MS, 50);
@@ -202,7 +202,7 @@ public class KafkaPubSubTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testNoResponsePartitionsWhenUnableToReachKafka() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         config.set(KafkaConfig.RESPONSE_PARTITIONS, null);
         config.set(MAX_BLOCK_MS, 50);
@@ -212,7 +212,7 @@ public class KafkaPubSubTest {
 
     @Test
     public void testGetSubscribersWhenNoPartitions() throws Exception {
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_SUBMISSION");
         config.set(KafkaConfig.RESPONSE_PARTITIONS, null);
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
@@ -224,7 +224,7 @@ public class KafkaPubSubTest {
         KafkaProducer<String, byte[]> producer = Mockito.mock(KafkaProducer.class);
         PartitionInfo dummy = new PartitionInfo("bullet", 0, null, null, null);
         Mockito.when(producer.partitionsFor(anyString())).thenReturn(Arrays.asList(dummy));
-        KafkaPubSub kafkaPubSub = new KafkaPubSub(new BulletConfig("src/test/resources/test_config.yaml"));
+        KafkaPubSub kafkaPubSub = new KafkaPubSub(new BulletConfig("test_config.yaml"));
         List<TopicPartition> partitions = kafkaPubSub.getAllPartitions(producer, "");
         Assert.assertEquals(partitions.size(), 1);
         Assert.assertEquals(partitions.get(0), new TopicPartition("bullet", 0));

@@ -18,6 +18,7 @@ import java.util.Set;
 public class KafkaConfigTest {
     private static final String BATCH_SIZE = KafkaConfig.PRODUCER_NAMESPACE + "batch.size";
     private static final String REQUEST_TIMEOUT = KafkaConfig.PRODUCER_NAMESPACE + "request.timeout.ms";
+    private static final String ALGORITHM = KafkaConfig.PRODUCER_NAMESPACE + "ssl.endpoint.identification.algorithm";
 
     @Test
     public void testDefaultFileKafkaSettings() {
@@ -32,7 +33,7 @@ public class KafkaConfigTest {
     @Test
     public void testCopyPubSubConfig() {
         String randomString = TestUtils.getRandomString();
-        BulletConfig config = new BulletConfig("src/test/resources/test_config.yaml");
+        BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(randomString, randomString);
         KafkaConfig kafkaConfig = new KafkaConfig(config);
         // Test copied property.
@@ -41,6 +42,7 @@ public class KafkaConfigTest {
         // Test default properties.
         Assert.assertEquals(kafkaConfig.get(BATCH_SIZE), "65536");
         Assert.assertEquals(kafkaConfig.get(KafkaConfig.REQUEST_TOPIC_NAME), "bullet.queries");
+        Assert.assertEquals(kafkaConfig.get(ALGORITHM), "");
     }
 
     @Test

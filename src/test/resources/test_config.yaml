@@ -15,3 +15,4 @@ bullet.pubsub.kafka.response.partitions:
 - 7
 bullet.pubsub.kafka.request.topic.name: "bullet.queries"
 bullet.pubsub.kafka.response.topic.name: "bullet.responses"
+bullet.pubsub.kafka.producer.ssl.endpoint.identification.algorithm: ""
