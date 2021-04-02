@@ -25,7 +25,11 @@ import static com.yahoo.bullet.kafka.CertRefreshingSslEngineFactory.SSL_KEY_LOCA
 import static com.yahoo.bullet.kafka.CertRefreshingSslEngineFactory.SSL_KEY_REFRESH_INTERVAL_CONFIG;
 import static org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG;
 import static org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 
 public class CertRefreshingSslEngineFactoryTest {
     private static final String FAKE_CERT = System.getProperty("user.dir") + "/src/test/resources/fake_cert.txt";
