@@ -33,8 +33,8 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
     public static final String SSL_KEY_REFRESH_INTERVAL_CONFIG = "ssl.cert.refreshing.refresh.interval.ms";
 
     // Package level for testing
-    String athenzPublicCertLocation;
-    String athenzPrivateKeyLocation;
+    String publicCertLocation;
+    String privateKeyLocation;
     String truststoreLocation;
     Password truststorePassword;
     int keyRefreshInterval;
@@ -46,8 +46,8 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
     @Override
     public void configure(Map<String, ?> configs) {
         log.info("Configuring {}...", this.getClass().getCanonicalName());
-        this.athenzPublicCertLocation = findFileOrThrow(configs, SSL_CERT_LOCATION_CONFIG);
-        this.athenzPrivateKeyLocation = findFileOrThrow(configs, SSL_KEY_LOCATION_CONFIG);
+        this.publicCertLocation = findFileOrThrow(configs, SSL_CERT_LOCATION_CONFIG);
+        this.privateKeyLocation = findFileOrThrow(configs, SSL_KEY_LOCATION_CONFIG);
         this.truststoreLocation = findFileOrThrow(configs, SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG);
         this.truststorePassword = (Password) configs.get(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG);
         this.keyRefreshInterval = Integer.parseInt((String) configs.get(SSL_KEY_REFRESH_INTERVAL_CONFIG));
@@ -114,7 +114,7 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
         // As of kafka-client 2.6 this method is only used on the server-side, so we don't need to return a real
         // keystore, but we will anyway just in case future kafka-client versions use it on the client side as well.
         try {
-            return createKeyStore(athenzPublicCertLocation, athenzPrivateKeyLocation);
+            return createKeyStore(publicCertLocation, privateKeyLocation);
         } catch (Exception e) {
             log.error("Error creating keystore - this function should not be getting called on the client side.", e);
             return null;
@@ -142,11 +142,11 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
         try {
             KeyRefresher keyRefresher = generateKeyRefresher(truststoreLocation,
                                                              truststorePassword.value(),
-                                                             athenzPublicCertLocation,
-                                                             athenzPrivateKeyLocation);
+                                                             publicCertLocation,
+                                                             privateKeyLocation);
             SSLContext sslContext = Utils.buildSSLContext(keyRefresher.getKeyManagerProxy(), keyRefresher.getTrustManagerProxy());
             keyRefresher.startup(keyRefreshInterval);
-            log.info("Creating SSLContext with KeyManagerProxy and TrustManagerProxy that will be refreshed every {} ms.", keyRefreshInterval);
+            log.info("Creating SSLContext that will refresh keys every {} ms.", keyRefreshInterval);
             return sslContext;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create SSLContext.", e);

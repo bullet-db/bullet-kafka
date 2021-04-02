@@ -43,8 +43,8 @@ public class CertRefreshingSslEngineFactoryTest {
     public void testConfigureSuccess() {
         factory.configure(conf);
 
-        Assert.assertEquals(factory.athenzPublicCertLocation, FAKE_CERT);
-        Assert.assertEquals(factory.athenzPrivateKeyLocation, FAKE_CERT);
+        Assert.assertEquals(factory.publicCertLocation, FAKE_CERT);
+        Assert.assertEquals(factory.privateKeyLocation, FAKE_CERT);
         Assert.assertEquals(factory.truststoreLocation, FAKE_CERT);
         Assert.assertEquals(factory.truststorePassword.value(), "password");
         Assert.assertEquals(factory.keyRefreshInterval, 1000);
@@ -66,8 +66,8 @@ public class CertRefreshingSslEngineFactoryTest {
         conf.put(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG, enabledProtocols);
         factory.configure(conf);
 
-        Assert.assertEquals(factory.athenzPublicCertLocation, FAKE_CERT);
-        Assert.assertEquals(factory.athenzPrivateKeyLocation, FAKE_CERT);
+        Assert.assertEquals(factory.publicCertLocation, FAKE_CERT);
+        Assert.assertEquals(factory.privateKeyLocation, FAKE_CERT);
         Assert.assertEquals(factory.truststoreLocation, FAKE_CERT);
         Assert.assertEquals(factory.truststorePassword.value(), "password");
         Assert.assertEquals(factory.keyRefreshInterval, 1000);
