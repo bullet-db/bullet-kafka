@@ -41,6 +41,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.yahoo.athenz</groupId>
+            <artifactId>athenz-cert-refresher</artifactId>
+            <version>1.10.10</version>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.9.6</version>
