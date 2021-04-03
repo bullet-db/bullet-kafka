@@ -12,6 +12,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.apache.kafka.common.config.types.Password;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
 import java.security.KeyStore;
@@ -20,9 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.yahoo.bullet.kafka.CertRefreshingSslEngineFactory.SSL_CERT_LOCATION_CONFIG;
-import static com.yahoo.bullet.kafka.CertRefreshingSslEngineFactory.SSL_KEY_LOCATION_CONFIG;
-import static com.yahoo.bullet.kafka.CertRefreshingSslEngineFactory.SSL_KEY_REFRESH_INTERVAL_CONFIG;
+import static com.yahoo.bullet.kafka.KafkaConfig.SSL_CERT_LOCATION;
+import static com.yahoo.bullet.kafka.KafkaConfig.SSL_KEY_LOCATION;
+import static com.yahoo.bullet.kafka.KafkaConfig.SSL_KEY_REFRESH_INTERVAL;
 import static org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG;
 import static org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG;
 import static org.mockito.Mockito.verify;
@@ -34,29 +35,31 @@ import static org.mockito.Mockito.mock;
 public class CertRefreshingSslEngineFactoryTest {
     private static final String FAKE_CERT = System.getProperty("user.dir") + "/src/test/resources/fake_cert.txt";
 
-    private CertRefreshingSslEngineFactorySentinel factory;
+    private CertRefreshingSslEngineFactorySentinel factorySentinel;
+    private InstantiableCertRefreshingSslEngineFactory instantiatedFactory;
     private Map<String, Object> conf;
 
     @BeforeMethod
     public void setup() {
-        this.factory = new CertRefreshingSslEngineFactorySentinel();
+        this.factorySentinel = new CertRefreshingSslEngineFactorySentinel();
+        this.instantiatedFactory = new InstantiableCertRefreshingSslEngineFactory();
         this.conf = getBasicConf();
     }
 
     @Test
     public void testConfigureSuccess() {
-        factory.configure(conf);
+        factorySentinel.configure(conf);
 
-        Assert.assertEquals(factory.publicCertLocation, FAKE_CERT);
-        Assert.assertEquals(factory.privateKeyLocation, FAKE_CERT);
-        Assert.assertEquals(factory.truststoreLocation, FAKE_CERT);
-        Assert.assertEquals(factory.truststorePassword.value(), "password");
-        Assert.assertEquals(factory.keyRefreshInterval, 1000);
-        Assert.assertNull(factory.cipherSuites);
-        Assert.assertNull(factory.enabledProtocols);
-        Assert.assertEquals(factory.keyRefreshInterval, 1000);
+        Assert.assertEquals(factorySentinel.publicCertLocation, FAKE_CERT);
+        Assert.assertEquals(factorySentinel.privateKeyLocation, FAKE_CERT);
+        Assert.assertEquals(factorySentinel.truststoreLocation, FAKE_CERT);
+        Assert.assertEquals(factorySentinel.truststorePassword.value(), "password");
+        Assert.assertEquals(factorySentinel.keyRefreshInterval, 1000);
+        Assert.assertNull(factorySentinel.cipherSuites);
+        Assert.assertNull(factorySentinel.enabledProtocols);
+        Assert.assertEquals(factorySentinel.keyRefreshInterval, 1000);
 
-        KeyRefresher mock = factory.getKeyRefresher();
+        KeyRefresher mock = factorySentinel.getKeyRefresher();
         verify(mock).getKeyManagerProxy();
         verify(mock).getTrustManagerProxy();
         verify(mock).startup(1000);
@@ -68,18 +71,18 @@ public class CertRefreshingSslEngineFactoryTest {
         List<String> enabledProtocols = Arrays.asList("some", "enabled", "protocols");
         conf.put(SslConfigs.SSL_CIPHER_SUITES_CONFIG, cipherSuites);
         conf.put(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG, enabledProtocols);
-        factory.configure(conf);
+        factorySentinel.configure(conf);
 
-        Assert.assertEquals(factory.publicCertLocation, FAKE_CERT);
-        Assert.assertEquals(factory.privateKeyLocation, FAKE_CERT);
-        Assert.assertEquals(factory.truststoreLocation, FAKE_CERT);
-        Assert.assertEquals(factory.truststorePassword.value(), "password");
-        Assert.assertEquals(factory.keyRefreshInterval, 1000);
-        Assert.assertEquals(factory.cipherSuites, cipherSuites.toArray());
-        Assert.assertEquals(factory.enabledProtocols, enabledProtocols.toArray());
-        Assert.assertEquals(factory.keyRefreshInterval, 1000);
+        Assert.assertEquals(factorySentinel.publicCertLocation, FAKE_CERT);
+        Assert.assertEquals(factorySentinel.privateKeyLocation, FAKE_CERT);
+        Assert.assertEquals(factorySentinel.truststoreLocation, FAKE_CERT);
+        Assert.assertEquals(factorySentinel.truststorePassword.value(), "password");
+        Assert.assertEquals(factorySentinel.keyRefreshInterval, 1000);
+        Assert.assertEquals(factorySentinel.cipherSuites, cipherSuites.toArray());
+        Assert.assertEquals(factorySentinel.enabledProtocols, enabledProtocols.toArray());
+        Assert.assertEquals(factorySentinel.keyRefreshInterval, 1000);
 
-        KeyRefresher mock = factory.getKeyRefresher();
+        KeyRefresher mock = factorySentinel.getKeyRefresher();
         verify(mock).getKeyManagerProxy();
         verify(mock).getTrustManagerProxy();
         verify(mock).startup(1000);
@@ -89,7 +92,7 @@ public class CertRefreshingSslEngineFactoryTest {
     public void testConfigureFileNotFound() {
         try {
             conf.put(SSL_TRUSTSTORE_LOCATION_CONFIG, "garbage");
-            factory.configure(conf);
+            factorySentinel.configure(conf);
             Assert.fail("configure() should throw with a garbage setting for truststore.");
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage().contains("garbage does not exist. Check the setting"));
@@ -100,83 +103,114 @@ public class CertRefreshingSslEngineFactoryTest {
     public void testCreateClientSslEngine() {
         List<String> cipherSuites = Arrays.asList("some", "cipher", "suites");
         conf.put(SslConfigs.SSL_CIPHER_SUITES_CONFIG, cipherSuites);
-        factory.configure(conf);
+        factorySentinel.configure(conf);
 
-        SSLEngine mock = factory.createClientSslEngine("peerHost", 88, "myAwesomeEndpointIdentification");
+        SSLEngine mock = factorySentinel.createClientSslEngine("peerHost", 88, "someEndpointIdentification");
 
         verify(mock).setEnabledCipherSuites((String[]) cipherSuites.toArray());
         verify(mock, times(0)).setEnabledProtocols(any());
         verify(mock).setUseClientMode(true);
-        Assert.assertEquals(mock.getSSLParameters().getEndpointIdentificationAlgorithm(), "myAwesomeEndpointIdentification");
+        Assert.assertEquals(mock.getSSLParameters().getEndpointIdentificationAlgorithm(), "someEndpointIdentification");
     }
 
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void testCreateServerSslEngine() {
-        try {
-            factory.configure(conf);
-            factory.createServerSslEngine("peerHost", 88);
-            Assert.fail("createServerSslEngine() should throw.");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            Assert.assertTrue(e.getMessage().contains("only supports client-side SSLEngines"));
-        }
+        factorySentinel.configure(conf);
+        factorySentinel.createServerSslEngine("peerHost", 88);
     }
 
     @Test
     public void testShouldBeRebuilt() {
-        factory.configure(conf);
-        Assert.assertFalse(factory.shouldBeRebuilt(null));
-        Assert.assertFalse(factory.shouldBeRebuilt(conf));
+        factorySentinel.configure(conf);
+        Assert.assertFalse(factorySentinel.shouldBeRebuilt(null));
+        Assert.assertFalse(factorySentinel.shouldBeRebuilt(conf));
     }
 
     @Test
     public void testReconfigurableConfigs() {
-        factory.configure(conf);
-        Assert.assertTrue(factory.reconfigurableConfigs().isEmpty());
+        factorySentinel.configure(conf);
+        Assert.assertTrue(factorySentinel.reconfigurableConfigs().isEmpty());
     }
 
     @Test
     public void testKeystore() {
-        factory.configure(conf);
-        factory.keystore();
+        factorySentinel.configure(conf);
+        factorySentinel.keystore();
 
         List<Object> expectedParamsPassedToUtilsClass = Arrays.asList(FAKE_CERT, FAKE_CERT);
-        Assert.assertEquals(factory.utilFunctionsCalled.size(), 2);
-        Assert.assertNotNull(factory.utilFunctionsCalled.get("generateKeyRefresher"));
-        Assert.assertEquals(factory.utilFunctionsCalled.get("createKeyStore"), expectedParamsPassedToUtilsClass);
+        Assert.assertEquals(factorySentinel.utilFunctionsCalled.size(), 2);
+        Assert.assertNotNull(factorySentinel.utilFunctionsCalled.get("generateKeyRefresher"));
+        Assert.assertEquals(factorySentinel.utilFunctionsCalled.get("createKeyStore"), expectedParamsPassedToUtilsClass);
     }
 
     @Test
     public void testTruststore() {
-        factory.configure(conf);
-        factory.truststore();
+        factorySentinel.configure(conf);
+        factorySentinel.truststore();
 
-        Assert.assertEquals(factory.utilFunctionsCalled.size(), 2);
-        Assert.assertNotNull(factory.utilFunctionsCalled.get("generateKeyRefresher"));
+        Assert.assertEquals(factorySentinel.utilFunctionsCalled.size(), 2);
+        Assert.assertNotNull(factorySentinel.utilFunctionsCalled.get("generateKeyRefresher"));
 
         List<Object> expectedParamsPassedToUtilsClass = Arrays.asList(FAKE_CERT, "password".toCharArray());
-        List<Object> actualParamsPassedToUtilsClass = factory.utilFunctionsCalled.get("getKeyStore");
+        List<Object> actualParamsPassedToUtilsClass = factorySentinel.utilFunctionsCalled.get("getKeyStore");
         Assert.assertEquals(actualParamsPassedToUtilsClass.get(0), expectedParamsPassedToUtilsClass.get(0));
         Assert.assertEquals(new String((char[]) actualParamsPassedToUtilsClass.get(1)), new String((char[]) expectedParamsPassedToUtilsClass.get(1)));
     }
 
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testConfigThrows() throws Exception {
+        new CertRefreshingSslEngineFactory().configure(conf);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testKeystoreThrows() throws Exception {
+        new CertRefreshingSslEngineFactory().keystore();
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testTruststoreThrows() throws Exception {
+        new CertRefreshingSslEngineFactory().truststore();
+    }
+
+    @Test
+    public void testConfigAllFilesFound() throws Exception {
+        instantiatedFactory.configure(conf);
+        Assert.assertNotNull(instantiatedFactory.publicCertLocation);
+        Assert.assertNotNull(instantiatedFactory.privateKeyLocation);
+        Assert.assertNotNull(instantiatedFactory.truststoreLocation);
+        Assert.assertNotNull(instantiatedFactory.truststorePassword);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testConfigFileNotFound() throws Exception {
+        conf.put(SSL_CERT_LOCATION, "does-not-exist");
+        instantiatedFactory.configure(conf);
+    }
+
     @Test
     public void testClose() throws Exception {
-        factory.configure(conf);
-        Assert.assertNotNull(factory.sslContext);
-        factory.close();
-        Assert.assertNull(factory.sslContext);
+        factorySentinel.configure(conf);
+        Assert.assertNotNull(factorySentinel.sslContext);
+        factorySentinel.close();
+        Assert.assertNull(factorySentinel.sslContext);
     }
 
     private static Map<String, Object> getBasicConf() {
         Map<String, Object> conf = new HashMap<>();
-        conf.put(SSL_CERT_LOCATION_CONFIG, FAKE_CERT);
-        conf.put(SSL_KEY_LOCATION_CONFIG, FAKE_CERT);
+        conf.put(SSL_CERT_LOCATION, FAKE_CERT);
+        conf.put(SSL_KEY_LOCATION, FAKE_CERT);
         conf.put(SSL_TRUSTSTORE_LOCATION_CONFIG, FAKE_CERT);
         conf.put(SSL_TRUSTSTORE_PASSWORD_CONFIG, new Password("password"));
-        conf.put(SSL_KEY_REFRESH_INTERVAL_CONFIG, "1000");
+        conf.put(SSL_KEY_REFRESH_INTERVAL, "1000");
 
         return conf;
+    }
+
+    private static class InstantiableCertRefreshingSslEngineFactory extends CertRefreshingSslEngineFactory {
+        @Override
+        protected SSLContext createSSLContext() {
+            return null;
+        }
     }
 
     private static class CertRefreshingSslEngineFactorySentinel extends CertRefreshingSslEngineFactory {
@@ -195,14 +229,14 @@ public class CertRefreshingSslEngineFactoryTest {
         }
 
         @Override
-        protected KeyStore createKeyStore(String athenzPublicCert, String athenzPrivateKey) throws Exception {
-            utilFunctionCalled("createKeyStore", Arrays.asList(athenzPublicCert, athenzPrivateKey));
+        protected KeyStore createKeyStore(String publicCertLocation, String privateKeyLocation) throws Exception {
+            utilFunctionCalled("createKeyStore", Arrays.asList(publicCertLocation, privateKeyLocation));
             return null;
         }
 
         @Override
-        protected KeyRefresher generateKeyRefresher(String trustStorePath, String trustStorePassword, String athenzPublicCert, String athenzPrivateKey) throws Exception {
-            utilFunctionCalled("generateKeyRefresher", Arrays.asList(trustStorePath, trustStorePassword, athenzPublicCert, athenzPrivateKey));
+        protected KeyRefresher generateKeyRefresher(String trustStorePath, String trustStorePassword, String publicCertLocation, String privateKeyLocation) throws Exception {
+            utilFunctionCalled("generateKeyRefresher", Arrays.asList(trustStorePath, trustStorePassword, publicCertLocation, privateKeyLocation));
             if (keyRefresher == null) {
                 this.keyRefresher = mock(KeyRefresher.class);
             }

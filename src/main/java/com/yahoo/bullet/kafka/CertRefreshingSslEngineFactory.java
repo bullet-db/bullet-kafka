@@ -28,10 +28,6 @@ import java.util.Set;
 
 @Slf4j
 public class CertRefreshingSslEngineFactory implements SslEngineFactory {
-    public static final String SSL_CERT_LOCATION_CONFIG = "ssl.cert.refreshing.cert.location";
-    public static final String SSL_KEY_LOCATION_CONFIG = "ssl.cert.refreshing.key.location";
-    public static final String SSL_KEY_REFRESH_INTERVAL_CONFIG = "ssl.cert.refreshing.refresh.interval.ms";
-
     // Package level for testing
     String publicCertLocation;
     String privateKeyLocation;
@@ -46,11 +42,11 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
     @Override
     public void configure(Map<String, ?> configs) {
         log.info("Configuring {}...", this.getClass().getCanonicalName());
-        this.publicCertLocation = findFileOrThrow(configs, SSL_CERT_LOCATION_CONFIG);
-        this.privateKeyLocation = findFileOrThrow(configs, SSL_KEY_LOCATION_CONFIG);
+        this.publicCertLocation = findFileOrThrow(configs, KafkaConfig.SSL_CERT_LOCATION);
+        this.privateKeyLocation = findFileOrThrow(configs, KafkaConfig.SSL_KEY_LOCATION);
         this.truststoreLocation = findFileOrThrow(configs, SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG);
         this.truststorePassword = (Password) configs.get(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG);
-        this.keyRefreshInterval = Integer.parseInt((String) configs.get(SSL_KEY_REFRESH_INTERVAL_CONFIG));
+        this.keyRefreshInterval = Integer.parseInt((String) configs.get(KafkaConfig.SSL_KEY_REFRESH_INTERVAL));
 
         SecurityUtils.addConfiguredSecurityProviders(configs);
 
@@ -89,8 +85,7 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
 
     @Override
     public SSLEngine createServerSslEngine(String peerHost, int peerPort) {
-        throw new RuntimeException(this.getClass().getCanonicalName() + " only supports client-side SSLEngines, it " +
-                                   "does not support createServerSslEngine().");
+        throw new RuntimeException("This only supports client-side SSLEngines, it does not support createServerSslEngine().");
     }
 
     @Override
@@ -111,25 +106,19 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
 
     @Override
     public KeyStore keystore() {
-        // As of kafka-client 2.6 this method is only used on the server-side, so we don't need to return a real
-        // keystore, but we will anyway just in case future kafka-client versions use it on the client side as well.
         try {
             return createKeyStore(publicCertLocation, privateKeyLocation);
         } catch (Exception e) {
-            log.error("Error creating keystore - this function should not be getting called on the client side.", e);
-            return null;
+            throw new RuntimeException("Error creating keystore.", e);
         }
     }
 
     @Override
     public KeyStore truststore() {
-        // As of kafka-client 2.6 this method is only used on the server-side, so we don't need to return a real
-        // truststore, but we will anyway just in case future kafka-client versions use it on the client side as well.
         try {
             return getKeyStore(truststoreLocation, truststorePassword.value().toCharArray());
         } catch (Exception e) {
-            log.error("Error creating truststore - this function should not be getting called on the client side.", e);
-            return null;
+            throw new RuntimeException("Error creating truststore.", e);
         }
     }
 
@@ -138,7 +127,14 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
         this.sslContext = null;
     }
 
-    private SSLContext createSSLContext() {
+    // Functions that proxy to other classes or require real certs can be extended for testing
+
+    /**
+     * Create an SSLContext.
+     *
+     * @return the {@link SSLContext}.
+     */
+    protected SSLContext createSSLContext() {
         try {
             KeyRefresher keyRefresher = generateKeyRefresher(truststoreLocation,
                                                              truststorePassword.value(),
@@ -153,20 +149,51 @@ public class CertRefreshingSslEngineFactory implements SslEngineFactory {
         }
     }
 
-    // Functions that proxy to other classes can be extended for testing
-
+    /**
+     * Generate a keystore from the given jks file and password.
+     *
+     * @param jksFilePath the path to the jks file.
+     * @param password the password for the jks file.
+     * @return the KeyStore.
+     * @throws Exception if the KeyStore cannot be generated with the given parameters.
+     */
     protected KeyStore getKeyStore(String jksFilePath, char[] password) throws Exception {
         return Utils.getKeyStore(jksFilePath, password);
     }
 
-    protected KeyStore createKeyStore(String athenzPublicCert, String athenzPrivateKey) throws Exception {
-        return Utils.createKeyStore(athenzPublicCert, athenzPrivateKey);
+    /**
+     * Generate a KeyStore from the given public cert and private key.
+     *
+     * @param publicCertLocation the location of the public cert.
+     * @param privateKeyLocation the location of the private key.
+     * @return the KeyStore.
+     * @throws Exception if the KeyStore cannot be generated with the given parameters.
+     */
+    protected KeyStore createKeyStore(String publicCertLocation, String privateKeyLocation) throws Exception {
+        return Utils.createKeyStore(publicCertLocation, privateKeyLocation);
     }
 
-    protected KeyRefresher generateKeyRefresher(String trustStorePath, String trustStorePassword, String athenzPublicCert, String athenzPrivateKey) throws Exception {
-        return Utils.generateKeyRefresher(trustStorePath, trustStorePassword, athenzPublicCert, athenzPrivateKey);
+    /**
+     * Generate a {@link KeyRefresher}.
+     *
+     * @param trustStorePath The path of the truststore file.
+     * @param trustStorePassword the password for the truststore.
+     * @param publicCertLocation the path of the public cert.
+     * @param privateKeyLocation the path of the private key.
+     * @return the KeyRefresher.
+     * @throws Exception if the KeyRefresher cannot be generated with the provided parameters.
+     */
+    protected KeyRefresher generateKeyRefresher(String trustStorePath, String trustStorePassword, String publicCertLocation, String privateKeyLocation) throws Exception {
+        return Utils.generateKeyRefresher(trustStorePath, trustStorePassword, publicCertLocation, privateKeyLocation);
     }
 
+    /**
+     * Create an {@link SSLEngine}.
+     *
+     * @param peerHost the peer host.
+     * @param peerPort the peer port.
+     * @return the SSLEngine.
+     */
     protected SSLEngine createSSLEngine(String peerHost, int peerPort) {
         return sslContext.createSSLEngine(peerHost, peerPort);
     }

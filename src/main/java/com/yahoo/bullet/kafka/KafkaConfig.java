@@ -23,10 +23,18 @@ public class KafkaConfig extends BulletConfig {
     public static final Set<String> COMMON_PROPERTIES =
         new HashSet<>(Arrays.asList(BOOTSTRAP_SERVERS, CONNECTIONS_MAX_IDLE_MS));
 
+    // Producer and consumer properties
+    public static final String SSL_CERT_LOCATION = "ssl.cert.refreshing.cert.location";
+    public static final String SSL_KEY_LOCATION = "ssl.cert.refreshing.key.location";
+    public static final String SSL_KEY_REFRESH_INTERVAL = "ssl.cert.refreshing.refresh.interval.ms";
+
     public static final String PRODUCER_NAMESPACE = KAFKA_NAMESPACE + "producer" + DELIMITER;
     // Producer specific properties
     public static final String KEY_SERIALIZER = PRODUCER_NAMESPACE + "key.serializer";
     public static final String VALUE_SERIALIZER = PRODUCER_NAMESPACE + "value.serializer";
+    public static final String PRODUCER_SSL_CERT_LOCATION = PRODUCER_NAMESPACE + SSL_CERT_LOCATION;
+    public static final String PRODUCER_SSL_KEY_LOCATION = PRODUCER_NAMESPACE + SSL_KEY_LOCATION;
+    public static final String PRODUCER_SSL_KEY_REFRESH_INTERVAL = PRODUCER_NAMESPACE + SSL_KEY_REFRESH_INTERVAL;
 
     public static final String CONSUMER_NAMESPACE = KAFKA_NAMESPACE + "consumer" + DELIMITER;
     // Consumer specific properties
@@ -34,6 +42,9 @@ public class KafkaConfig extends BulletConfig {
     public static final String ENABLE_AUTO_COMMIT = CONSUMER_NAMESPACE + "enable.auto.commit";
     public static final String KEY_DESERIALIZER = CONSUMER_NAMESPACE + "key.deserializer";
     public static final String VALUE_DESERIALIZER = CONSUMER_NAMESPACE + "value.deserializer";
+    public static final String CONSUMER_SSL_CERT_LOCATION = CONSUMER_NAMESPACE + SSL_CERT_LOCATION;
+    public static final String CONSUMER_SSL_KEY_LOCATION = CONSUMER_NAMESPACE + SSL_KEY_LOCATION;
+    public static final String CONSUMER_SSL_KEY_REFRESH_INTERVAL = CONSUMER_NAMESPACE + SSL_KEY_REFRESH_INTERVAL;
 
     // Kafka PubSub properties
     public static final String REQUEST_PARTITIONS = KAFKA_NAMESPACE + "request.partitions";
@@ -89,6 +100,30 @@ public class KafkaConfig extends BulletConfig {
                  .checkIf(Validator::isString)
                  .checkIf(Validator.isIn(TRUE, FALSE))
                  .defaultTo(DEFAULT_ENABLE_AUTO_COMMIT);
+        VALIDATOR.define(PRODUCER_SSL_CERT_LOCATION)
+                 .checkIf(Validator::isString)
+                 .unless(Validator::isNull)
+                 .orFail();
+        VALIDATOR.define(PRODUCER_SSL_KEY_LOCATION)
+                 .checkIf(Validator::isString)
+                 .unless(Validator::isNull)
+                 .orFail();
+        VALIDATOR.define(PRODUCER_SSL_KEY_REFRESH_INTERVAL)
+                 .checkIf(Validator::isInt)
+                 .unless(Validator::isNull)
+                 .orFail();
+        VALIDATOR.define(CONSUMER_SSL_CERT_LOCATION)
+                 .checkIf(Validator::isString)
+                 .unless(Validator::isNull)
+                 .orFail();
+        VALIDATOR.define(CONSUMER_SSL_KEY_LOCATION)
+                 .checkIf(Validator::isString)
+                 .unless(Validator::isNull)
+                 .orFail();
+        VALIDATOR.define(CONSUMER_SSL_KEY_REFRESH_INTERVAL)
+                 .checkIf(Validator::isInt)
+                 .unless(Validator::isNull)
+                 .orFail();
     }
 
     /**
