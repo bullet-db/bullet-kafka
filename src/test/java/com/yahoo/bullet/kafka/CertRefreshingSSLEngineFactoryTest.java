@@ -15,6 +15,7 @@ import org.apache.kafka.common.config.types.Password;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
+import java.io.FileNotFoundException;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -210,6 +211,21 @@ public class CertRefreshingSSLEngineFactoryTest {
     @Test(expectedExceptions = RuntimeException.class)
     public void testCreateSSLEngineThrowsWithNoContext() throws Exception {
         instantiatedFactory.createSSLEngine("somePeerHost", 88);
+    }
+
+    @Test(expectedExceptions = FileNotFoundException.class)
+    public void testCreateKeyStoreThrows() throws Exception {
+        instantiatedFactory.createKeyStore("certLocation", "keyLocation");
+    }
+
+    @Test(expectedExceptions = FileNotFoundException.class)
+    public void testGenerateKeyRefresherThrows() throws Exception {
+        instantiatedFactory.generateKeyRefresher("truststorePath", "password", "certLocation", "keyLocation");
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testCreateSSLEngineThrows() throws Exception {
+        instantiatedFactory.createSSLEngine("port", 88);
     }
 
     @Test
