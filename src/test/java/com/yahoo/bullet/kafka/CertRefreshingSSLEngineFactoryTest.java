@@ -32,17 +32,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 
-public class CertRefreshingSslEngineFactoryTest {
+public class CertRefreshingSSLEngineFactoryTest {
     private static final String FAKE_CERT = System.getProperty("user.dir") + "/src/test/resources/fake_cert.txt";
 
-    private CertRefreshingSslEngineFactorySentinel factorySentinel;
-    private InstantiableCertRefreshingSslEngineFactory instantiatedFactory;
+    private CertRefreshingSSLEngineFactorySentinel factorySentinel;
+    private InstantiableCertRefreshingSSLEngineFactory instantiatedFactory;
     private Map<String, Object> conf;
 
     @BeforeMethod
     public void setup() {
-        this.factorySentinel = new CertRefreshingSslEngineFactorySentinel();
-        this.instantiatedFactory = new InstantiableCertRefreshingSslEngineFactory();
+        this.factorySentinel = new CertRefreshingSSLEngineFactorySentinel();
+        this.instantiatedFactory = new InstantiableCertRefreshingSSLEngineFactory();
         this.conf = getBasicConf();
     }
 
@@ -101,14 +101,28 @@ public class CertRefreshingSslEngineFactoryTest {
 
     @Test
     public void testCreateClientSslEngine() {
+        factorySentinel.configure(conf);
+
+        SSLEngine mock = factorySentinel.createClientSslEngine("peerHost", 88, "someEndpointIdentification");
+
+        verify(mock, times(0)).setEnabledCipherSuites(any());
+        verify(mock, times(0)).setEnabledProtocols(any());
+        verify(mock).setUseClientMode(true);
+        Assert.assertEquals(mock.getSSLParameters().getEndpointIdentificationAlgorithm(), "someEndpointIdentification");
+    }
+
+    @Test
+    public void testCreateClientSslEngineWithParams() {
         List<String> cipherSuites = Arrays.asList("some", "cipher", "suites");
+        List<String> enabledProtocols = Arrays.asList("some", "enabled", "protocols");
         conf.put(SslConfigs.SSL_CIPHER_SUITES_CONFIG, cipherSuites);
+        conf.put(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG, enabledProtocols);
         factorySentinel.configure(conf);
 
         SSLEngine mock = factorySentinel.createClientSslEngine("peerHost", 88, "someEndpointIdentification");
 
         verify(mock).setEnabledCipherSuites((String[]) cipherSuites.toArray());
-        verify(mock, times(0)).setEnabledProtocols(any());
+        verify(mock).setEnabledProtocols((String[]) enabledProtocols.toArray());
         verify(mock).setUseClientMode(true);
         Assert.assertEquals(mock.getSSLParameters().getEndpointIdentificationAlgorithm(), "someEndpointIdentification");
     }
@@ -159,17 +173,17 @@ public class CertRefreshingSslEngineFactoryTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testConfigThrows() throws Exception {
-        new CertRefreshingSslEngineFactory().configure(conf);
+        new CertRefreshingSSLEngineFactory().configure(conf);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testKeystoreThrows() throws Exception {
-        new CertRefreshingSslEngineFactory().keystore();
+        new CertRefreshingSSLEngineFactory().keystore();
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testTruststoreThrows() throws Exception {
-        new CertRefreshingSslEngineFactory().truststore();
+        new CertRefreshingSSLEngineFactory().truststore();
     }
 
     @Test
@@ -185,6 +199,17 @@ public class CertRefreshingSslEngineFactoryTest {
     public void testConfigFileNotFound() throws Exception {
         conf.put(SSL_CERT_LOCATION, "does-not-exist");
         instantiatedFactory.configure(conf);
+    }
+
+    @Test
+    public void testGetKeystore() throws Exception {
+        KeyStore keyStore = instantiatedFactory.getKeyStore("somePath", "somePassword".toCharArray());
+        Assert.assertNotNull(keyStore);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testCreateSSLEngineThrowsWithNoContext() throws Exception {
+        instantiatedFactory.createSSLEngine("somePeerHost", 88);
     }
 
     @Test
@@ -206,14 +231,14 @@ public class CertRefreshingSslEngineFactoryTest {
         return conf;
     }
 
-    private static class InstantiableCertRefreshingSslEngineFactory extends CertRefreshingSslEngineFactory {
+    private static class InstantiableCertRefreshingSSLEngineFactory extends CertRefreshingSSLEngineFactory {
         @Override
         protected SSLContext createSSLContext() {
             return null;
         }
     }
 
-    private static class CertRefreshingSslEngineFactorySentinel extends CertRefreshingSslEngineFactory {
+    private static class CertRefreshingSSLEngineFactorySentinel extends CertRefreshingSSLEngineFactory {
         private KeyRefresher keyRefresher;
         private SSLEngine sslEngine;
         private Map<String, List<Object>> utilFunctionsCalled;

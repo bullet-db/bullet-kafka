@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-public class CertRefreshingSslEngineFactory implements SslEngineFactory {
+public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
     // Package level for testing
     String publicCertLocation;
     String privateKeyLocation;
