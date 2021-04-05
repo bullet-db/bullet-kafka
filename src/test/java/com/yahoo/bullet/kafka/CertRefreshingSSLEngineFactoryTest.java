@@ -67,7 +67,7 @@ public class CertRefreshingSSLEngineFactoryTest {
     }
 
     @Test
-    public void testConfigureOptionalValues() throws Exception {
+    public void testConfigureOptionalValues() {
         List<String> cipherSuites = Arrays.asList("some", "cipher", "suites");
         List<String> enabledProtocols = Arrays.asList("some", "enabled", "protocols");
         conf.put(SslConfigs.SSL_CIPHER_SUITES_CONFIG, cipherSuites);
@@ -89,15 +89,40 @@ public class CertRefreshingSSLEngineFactoryTest {
         verify(mock).startup(1000);
     }
 
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testConfigureCertNotFound() {
+        conf.put(SSL_CERT_LOCATION, "does-not-exist");
+        instantiatedFactory.configure(conf);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testConfigureTruststoreNotFound() {
+        conf.put(SSL_TRUSTSTORE_LOCATION_CONFIG, "does-not-exist");
+        instantiatedFactory.configure(conf);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testRealConfigureThrows() {
+        new CertRefreshingSSLEngineFactory().configure(conf);
+    }
+
     @Test
-    public void testConfigureFileNotFound() {
-        try {
-            conf.put(SSL_TRUSTSTORE_LOCATION_CONFIG, "garbage");
-            factorySentinel.configure(conf);
-            Assert.fail("configure() should throw with a garbage setting for truststore.");
-        } catch (Exception e) {
-            Assert.assertTrue(e.getMessage().contains("garbage does not exist. Check the setting"));
-        }
+    public void testConfigureAllFilesFound() {
+        instantiatedFactory.configure(conf);
+        Assert.assertNotNull(instantiatedFactory.publicCertLocation);
+        Assert.assertNotNull(instantiatedFactory.privateKeyLocation);
+        Assert.assertNotNull(instantiatedFactory.truststoreLocation);
+        Assert.assertNotNull(instantiatedFactory.truststorePassword);
+    }
+
+    @Test
+    public void testConfigureAllFilesFoundWithLocal() {
+        conf.put(SSL_TRUSTSTORE_LOCATION_CONFIG, "pom.xml");
+        instantiatedFactory.configure(conf);
+        Assert.assertNotNull(instantiatedFactory.publicCertLocation);
+        Assert.assertNotNull(instantiatedFactory.privateKeyLocation);
+        Assert.assertNotNull(instantiatedFactory.truststoreLocation);
+        Assert.assertNotNull(instantiatedFactory.truststorePassword);
     }
 
     @Test
@@ -129,7 +154,7 @@ public class CertRefreshingSSLEngineFactoryTest {
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void testCreateServerSslEngine() {
+    public void testCreateServerSslEngineNotSupported() {
         factorySentinel.configure(conf);
         factorySentinel.createServerSslEngine("peerHost", 88);
     }
@@ -158,6 +183,11 @@ public class CertRefreshingSSLEngineFactoryTest {
         Assert.assertEquals(factorySentinel.utilFunctionsCalled.get("createKeyStore"), expectedParamsPassedToUtilsClass);
     }
 
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testKeystoreThrows() {
+        new CertRefreshingSSLEngineFactory().keystore();
+    }
+
     @Test
     public void testTruststore() {
         factorySentinel.configure(conf);
@@ -173,44 +203,22 @@ public class CertRefreshingSSLEngineFactoryTest {
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void testConfigThrows() throws Exception {
-        new CertRefreshingSSLEngineFactory().configure(conf);
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void testKeystoreThrows() throws Exception {
-        new CertRefreshingSSLEngineFactory().keystore();
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void testTruststoreThrows() throws Exception {
+    public void testTruststoreThrows() {
         new CertRefreshingSSLEngineFactory().truststore();
     }
 
     @Test
-    public void testConfigAllFilesFound() throws Exception {
-        instantiatedFactory.configure(conf);
-        Assert.assertNotNull(instantiatedFactory.publicCertLocation);
-        Assert.assertNotNull(instantiatedFactory.privateKeyLocation);
-        Assert.assertNotNull(instantiatedFactory.truststoreLocation);
-        Assert.assertNotNull(instantiatedFactory.truststorePassword);
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void testConfigFileNotFound() throws Exception {
-        conf.put(SSL_CERT_LOCATION, "does-not-exist");
-        instantiatedFactory.configure(conf);
+    public void testClose() throws Exception {
+        factorySentinel.configure(conf);
+        Assert.assertNotNull(factorySentinel.sslContext);
+        factorySentinel.close();
+        Assert.assertNull(factorySentinel.sslContext);
     }
 
     @Test
     public void testGetKeystore() throws Exception {
         KeyStore keyStore = instantiatedFactory.getKeyStore("somePath", "somePassword".toCharArray());
         Assert.assertNotNull(keyStore);
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void testCreateSSLEngineThrowsWithNoContext() throws Exception {
-        instantiatedFactory.createSSLEngine("somePeerHost", 88);
     }
 
     @Test(expectedExceptions = FileNotFoundException.class)
@@ -224,16 +232,8 @@ public class CertRefreshingSSLEngineFactoryTest {
     }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void testCreateSSLEngineThrows() throws Exception {
-        instantiatedFactory.createSSLEngine("port", 88);
-    }
-
-    @Test
-    public void testClose() throws Exception {
-        factorySentinel.configure(conf);
-        Assert.assertNotNull(factorySentinel.sslContext);
-        factorySentinel.close();
-        Assert.assertNull(factorySentinel.sslContext);
+    public void testCreateSSLEngineThrowsWithNoContext() {
+        instantiatedFactory.createSSLEngine("somePeerHost", 88);
     }
 
     private static Map<String, Object> getBasicConf() {
