@@ -12,7 +12,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.apache.kafka.common.config.types.Password;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
 import java.io.FileNotFoundException;
 import java.security.KeyStore;
 import java.util.Arrays;
@@ -26,8 +28,10 @@ import static com.yahoo.bullet.kafka.KafkaConfig.SSL_KEY_REFRESH_INTERVAL;
 import static org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG;
 import static org.apache.kafka.common.config.SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 
 public class CertRefreshingSSLEngineFactoryTest {
     private static final String FAKE_CERT = System.getProperty("user.dir") + "/src/test/resources/fake_cert.txt";
@@ -241,5 +245,60 @@ public class CertRefreshingSSLEngineFactoryTest {
         conf.put(SSL_KEY_REFRESH_INTERVAL, "1000");
 
         return conf;
+    }
+
+    public static class InstantiableCertRefreshingSSLEngineFactory extends CertRefreshingSSLEngineFactory {
+        @Override
+        protected SSLContext createSSLContext() {
+            return null;
+        }
+    }
+
+    public static class CertRefreshingSSLEngineFactorySentinel extends CertRefreshingSSLEngineFactory {
+        private KeyRefresher keyRefresher;
+        private SSLEngine sslEngine;
+        private Map<String, List<Object>> utilFunctionsCalled;
+
+        public KeyRefresher getKeyRefresher() {
+            return keyRefresher;
+        }
+
+        @Override
+        protected KeyStore getKeyStore(String jksFilePath, char[] password) throws Exception {
+            utilFunctionCalled("getKeyStore", Arrays.asList(jksFilePath, password));
+            return null;
+        }
+
+        @Override
+        protected KeyStore createKeyStore(String publicCertLocation, String privateKeyLocation) throws Exception {
+            utilFunctionCalled("createKeyStore", Arrays.asList(publicCertLocation, privateKeyLocation));
+            return null;
+        }
+
+        @Override
+        protected KeyRefresher generateKeyRefresher(String trustStorePath, String trustStorePassword, String publicCertLocation, String privateKeyLocation) throws Exception {
+            utilFunctionCalled("generateKeyRefresher", Arrays.asList(trustStorePath, trustStorePassword, publicCertLocation, privateKeyLocation));
+            if (keyRefresher == null) {
+                this.keyRefresher = mock(KeyRefresher.class);
+            }
+            return keyRefresher;
+        }
+
+        @Override
+        protected SSLEngine createSSLEngine(String peerHost, int peerPort) {
+            if (sslEngine == null) {
+                SSLParameters sslParams = new SSLParameters();
+                sslEngine = mock(SSLEngine.class);
+                doReturn(sslParams).when(sslEngine).getSSLParameters();
+            }
+            return sslEngine;
+        }
+
+        private void utilFunctionCalled(String function, List<Object> args) {
+            if (utilFunctionsCalled == null) {
+                utilFunctionsCalled = new HashMap<>();
+            }
+            utilFunctionsCalled.put(function, args);
+        }
     }
 }
