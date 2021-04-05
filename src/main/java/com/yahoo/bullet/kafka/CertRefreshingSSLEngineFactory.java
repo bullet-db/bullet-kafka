@@ -26,6 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This implementation of Kafka's {@link SslEngineFactory} will periodically check the certs used for SSL
+ * authentication and rebuild the KeyStore, and/or reload the Truststore if changes have been made to the
+ * files on disk. This functionality is only supported in Kafka 2.6 or later. This class is a client-side
+ * implementation only - server-side functions like `createServerSslEngine()` are not supported. See
+ * `src/main/resources/bullet_kafka_defaults.yaml` for a list of required settings.
+ */
 @Slf4j
 public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
     // Package level for testing
