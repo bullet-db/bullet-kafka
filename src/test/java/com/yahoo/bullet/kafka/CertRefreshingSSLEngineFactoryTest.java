@@ -247,14 +247,14 @@ public class CertRefreshingSSLEngineFactoryTest {
         return conf;
     }
 
-    private static class InstantiableCertRefreshingSSLEngineFactory extends CertRefreshingSSLEngineFactory {
+    public static class InstantiableCertRefreshingSSLEngineFactory extends CertRefreshingSSLEngineFactory {
         @Override
         protected SSLContext createSSLContext() {
             return null;
         }
     }
 
-    private static class CertRefreshingSSLEngineFactorySentinel extends CertRefreshingSSLEngineFactory {
+    public static class CertRefreshingSSLEngineFactorySentinel extends CertRefreshingSSLEngineFactory {
         private KeyRefresher keyRefresher;
         private SSLEngine sslEngine;
         private Map<String, List<Object>> utilFunctionsCalled;
