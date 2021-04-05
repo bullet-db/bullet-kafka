@@ -26,7 +26,7 @@ public class KafkaQueryPublisher implements Publisher {
     /**
      * Set metadata required to route responses.
      *
-     * @param message the {@link PubSubMessage} to set metadata to.
+     * @param message The {@link PubSubMessage} to set metadata to.
      */
     private void setRouteData(PubSubMessage message) throws PubSubException {
         try {

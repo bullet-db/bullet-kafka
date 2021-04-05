@@ -39,7 +39,28 @@ bullet.pubsub.kafka.subscriber.max.uncommitted.messages: 50
 bullet.pubsub.kafka.request.topic.name: "bullet.queries"
 bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 
-# The following settings are optional. If not provided, the topics configured for requests and responses are fully used.
+# Optional settings:
+
+# The following settings can be used when "SSL" is being used to authenticate with Kafka:
+# bullet.pubsub.kafka.producer.security.protocol: "SSL"
+
+# This class will automatically refresh certs in the Kafka client producer at a configurable interval
+# bullet.pubsub.kafka.producer.ssl.engine.factory.class: "com.yahoo.bullet.kafka.CertRefreshingSSLEngineFactory"
+# bullet.pubsub.kafka.producer.ssl.truststore.location: "my-truststore.jks"
+# bullet.pubsub.kafka.producer.ssl.truststore.password: "changeit"
+# bullet.pubsub.kafka.producer.ssl.cert.refreshing.cert.location: "my-cert.pem"
+# bullet.pubsub.kafka.producer.ssl.cert.refreshing.key.location: "my-key.pem"
+# bullet.pubsub.kafka.producer.ssl.cert.refreshing.refresh.interval.ms: "3600000"
+
+# This class will automatically refresh certs in the Kafka client consumer at a configurable interval
+# bullet.pubsub.kafka.consumer.ssl.engine.factory.class: "com.yahoo.bullet.kafka.CertRefreshingSSLEngineFactory"
+# bullet.pubsub.kafka.consumer.ssl.truststore.location: "my-truststore.jks"
+# bullet.pubsub.kafka.consumer.ssl.truststore.password: "changeit"
+# bullet.pubsub.kafka.consumer.ssl.cert.refreshing.cert.location: "my-cert.pem"
+# bullet.pubsub.kafka.consumer.ssl.cert.refreshing.key.location: "my-key.pem"
+# bullet.pubsub.kafka.consumer.ssl.cert.refreshing.refresh.interval.ms: "3600000"
+
+# The following settings are for partitioning. If not provided, the topics for requests and responses are fully used.
 # If you've partitioned your request and response topics and want to spread them across web-service machines, you can
 # configure the following when you set your "bullet.pubsub.context.name" to QUERY_SUBMISSION and
 # "bullet.pubsub.class.name" to "com.yahoo.bullet.kafka.KafkaPubSub".
