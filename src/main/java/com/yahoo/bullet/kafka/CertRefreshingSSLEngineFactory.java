@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * This implementation of Kafka's {@link SslEngineFactory} will periodically check the certs used for SSL
- * authentication and rebuild the KeyStore, and/or reload the Truststore if changes have been made to the
+ * authentication and rebuild the keystore, and/or reload the truststore if changes have been made to the
  * files on disk. This functionality is only supported in Kafka 2.6 or later. This class is a client-side
  * implementation only - server-side functions like `createServerSslEngine()` are not supported. See
  * `src/main/resources/bullet_kafka_defaults.yaml` for a list of required settings.
@@ -92,7 +92,7 @@ public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
 
     @Override
     public SSLEngine createServerSslEngine(String peerHost, int peerPort) {
-        throw new RuntimeException("This only supports client-side SSLEngines, it does not support createServerSslEngine().");
+        throw new UnsupportedOperationException("This only supports client-side SSLEngines, it does not support createServerSslEngine().");
     }
 
     @Override
@@ -139,7 +139,7 @@ public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
     /**
      * Create an SSLContext.
      *
-     * @return the {@link SSLContext}.
+     * @return The {@link SSLContext}.
      */
     protected SSLContext createSSLContext() {
         try {
@@ -159,22 +159,22 @@ public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
     /**
      * Generate a keystore from the given jks file and password.
      *
-     * @param jksFilePath the path to the jks file.
-     * @param password the password for the jks file.
-     * @return the KeyStore.
-     * @throws Exception if the KeyStore cannot be generated with the given parameters.
+     * @param jksFilePath The path to the jks file.
+     * @param password The password for the jks file.
+     * @return The keystore.
+     * @throws Exception if the keystore cannot be generated with the given parameters.
      */
     protected KeyStore getKeyStore(String jksFilePath, char[] password) throws Exception {
         return Utils.getKeyStore(jksFilePath, password);
     }
 
     /**
-     * Generate a KeyStore from the given public cert and private key.
+     * Generate a keystore from the given public cert and private key.
      *
-     * @param publicCertLocation the location of the public cert.
-     * @param privateKeyLocation the location of the private key.
-     * @return the KeyStore.
-     * @throws Exception if the KeyStore cannot be generated with the given parameters.
+     * @param publicCertLocation The location of the public cert.
+     * @param privateKeyLocation The location of the private key.
+     * @return The keystore.
+     * @throws Exception if the keystore cannot be generated with the given parameters.
      */
     protected KeyStore createKeyStore(String publicCertLocation, String privateKeyLocation) throws Exception {
         return Utils.createKeyStore(publicCertLocation, privateKeyLocation);
@@ -184,10 +184,10 @@ public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
      * Generate a {@link KeyRefresher}.
      *
      * @param trustStorePath The path of the truststore file.
-     * @param trustStorePassword the password for the truststore.
-     * @param publicCertLocation the path of the public cert.
-     * @param privateKeyLocation the path of the private key.
-     * @return the KeyRefresher.
+     * @param trustStorePassword The password for the truststore.
+     * @param publicCertLocation The path of the public cert.
+     * @param privateKeyLocation The path of the private key.
+     * @return The KeyRefresher.
      * @throws Exception if the KeyRefresher cannot be generated with the provided parameters.
      */
     protected KeyRefresher generateKeyRefresher(String trustStorePath, String trustStorePassword, String publicCertLocation, String privateKeyLocation) throws Exception {
@@ -197,9 +197,9 @@ public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
     /**
      * Create an {@link SSLEngine}.
      *
-     * @param peerHost the peer host.
-     * @param peerPort the peer port.
-     * @return the SSLEngine.
+     * @param peerHost The peer host.
+     * @param peerPort The peer port.
+     * @return The SSLEngine.
      */
     protected SSLEngine createSSLEngine(String peerHost, int peerPort) {
         return sslContext.createSSLEngine(peerHost, peerPort);

@@ -45,7 +45,7 @@ bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 # bullet.pubsub.kafka.producer.security.protocol: "SSL"
 
 # This class will automatically refresh certs in the Kafka client producer at a configurable interval
-# bullet.pubsub.kafka.producer.ssl.engine.factory.class: "com.yahoo.bullet.kafka.CertRefreshingSslEngineFactory"
+# bullet.pubsub.kafka.producer.ssl.engine.factory.class: "com.yahoo.bullet.kafka.CertRefreshingSSLEngineFactory"
 # bullet.pubsub.kafka.producer.ssl.truststore.location: "my-truststore.jks"
 # bullet.pubsub.kafka.producer.ssl.truststore.password: "changeit"
 # bullet.pubsub.kafka.producer.ssl.cert.refreshing.cert.location: "my-cert.pem"
@@ -53,7 +53,7 @@ bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 # bullet.pubsub.kafka.producer.ssl.cert.refreshing.refresh.interval.ms: "3600000"
 
 # This class will automatically refresh certs in the Kafka client consumer at a configurable interval
-# bullet.pubsub.kafka.consumer.ssl.engine.factory.class: "com.yahoo.bullet.kafka.CertRefreshingSslEngineFactory"
+# bullet.pubsub.kafka.consumer.ssl.engine.factory.class: "com.yahoo.bullet.kafka.CertRefreshingSSLEngineFactory"
 # bullet.pubsub.kafka.consumer.ssl.truststore.location: "my-truststore.jks"
 # bullet.pubsub.kafka.consumer.ssl.truststore.password: "changeit"
 # bullet.pubsub.kafka.consumer.ssl.cert.refreshing.cert.location: "my-cert.pem"

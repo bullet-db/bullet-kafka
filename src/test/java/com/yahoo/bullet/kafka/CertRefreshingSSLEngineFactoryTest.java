@@ -153,7 +153,7 @@ public class CertRefreshingSSLEngineFactoryTest {
         Assert.assertEquals(mock.getSSLParameters().getEndpointIdentificationAlgorithm(), "someEndpointIdentification");
     }
 
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testCreateServerSslEngineNotSupported() {
         factorySentinel.configure(conf);
         factorySentinel.createServerSslEngine("peerHost", 88);
