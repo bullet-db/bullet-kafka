@@ -109,7 +109,8 @@ public class KafkaConfig extends BulletConfig {
                  .unless(Validator::isNull)
                  .orFail();
         VALIDATOR.define(PRODUCER_SSL_KEY_REFRESH_INTERVAL)
-                 .checkIf(Validator::isInt)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt)
                  .unless(Validator::isNull)
                  .orFail();
         VALIDATOR.define(CONSUMER_SSL_CERT_LOCATION)
@@ -121,7 +122,8 @@ public class KafkaConfig extends BulletConfig {
                  .unless(Validator::isNull)
                  .orFail();
         VALIDATOR.define(CONSUMER_SSL_KEY_REFRESH_INTERVAL)
-                 .checkIf(Validator::isInt)
+                 .checkIf(Validator::isPositiveInt)
+                 .castTo(Validator::asInt)
                  .unless(Validator::isNull)
                  .orFail();
     }
