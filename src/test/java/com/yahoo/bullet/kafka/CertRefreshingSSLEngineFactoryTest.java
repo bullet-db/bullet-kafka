@@ -242,7 +242,7 @@ public class CertRefreshingSSLEngineFactoryTest {
         conf.put(SSL_KEY_LOCATION, FAKE_CERT);
         conf.put(SSL_TRUSTSTORE_LOCATION_CONFIG, FAKE_CERT);
         conf.put(SSL_TRUSTSTORE_PASSWORD_CONFIG, new Password("password"));
-        conf.put(SSL_KEY_REFRESH_INTERVAL, "1000");
+        conf.put(SSL_KEY_REFRESH_INTERVAL, 1000);
 
         return conf;
     }

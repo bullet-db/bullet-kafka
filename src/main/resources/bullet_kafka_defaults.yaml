@@ -50,7 +50,7 @@ bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 # bullet.pubsub.kafka.producer.ssl.truststore.password: "changeit"
 # bullet.pubsub.kafka.producer.ssl.cert.refreshing.cert.location: "my-cert.pem"
 # bullet.pubsub.kafka.producer.ssl.cert.refreshing.key.location: "my-key.pem"
-# bullet.pubsub.kafka.producer.ssl.cert.refreshing.refresh.interval.ms: "3600000"
+# bullet.pubsub.kafka.producer.ssl.cert.refreshing.refresh.interval.ms: 3600000
 
 # This class will automatically refresh certs in the Kafka client consumer at a configurable interval
 # bullet.pubsub.kafka.consumer.ssl.engine.factory.class: "com.yahoo.bullet.kafka.CertRefreshingSSLEngineFactory"
@@ -58,7 +58,7 @@ bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 # bullet.pubsub.kafka.consumer.ssl.truststore.password: "changeit"
 # bullet.pubsub.kafka.consumer.ssl.cert.refreshing.cert.location: "my-cert.pem"
 # bullet.pubsub.kafka.consumer.ssl.cert.refreshing.key.location: "my-key.pem"
-# bullet.pubsub.kafka.consumer.ssl.cert.refreshing.refresh.interval.ms: "3600000"
+# bullet.pubsub.kafka.consumer.ssl.cert.refreshing.refresh.interval.ms: 3600000
 
 # The following settings are for partitioning. If not provided, the topics for requests and responses are fully used.
 # If you've partitioned your request and response topics and want to spread them across web-service machines, you can

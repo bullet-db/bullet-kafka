@@ -53,7 +53,7 @@ public class CertRefreshingSSLEngineFactory implements SslEngineFactory {
         this.privateKeyLocation = findFileOrThrow(configs, KafkaConfig.SSL_KEY_LOCATION);
         this.truststoreLocation = findFileOrThrow(configs, SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG);
         this.truststorePassword = (Password) configs.get(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG);
-        this.keyRefreshInterval = Integer.parseInt((String) configs.get(KafkaConfig.SSL_KEY_REFRESH_INTERVAL));
+        this.keyRefreshInterval = (Integer) configs.get(KafkaConfig.SSL_KEY_REFRESH_INTERVAL);
 
         SecurityUtils.addConfiguredSecurityProviders(configs);
 
