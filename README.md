@@ -1,6 +1,8 @@
 # Bullet Kafka
 
-[![Build Status](https://travis-ci.com/bullet-db/bullet-kafka.svg?branch=master)](https://travis-ci.com/bullet-db/bullet-kafka) [![Coverage Status](https://coveralls.io/repos/github/bullet-db/bullet-kafka/badge.svg?branch=master)](https://coveralls.io/github/bullet-db/bullet-kafka?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yahoo.bullet/bullet-kafka/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.yahoo.bullet/bullet-kafka/)
+[![Build Status](https://cd.screwdriver.cd/pipelines/7223/badge)](https://cd.screwdriver.cd/pipelines/7223)
+[![Coverage Status](https://coveralls.io/repos/github/bullet-db/bullet-kafka/badge.svg?branch=master)](https://coveralls.io/github/bullet-db/bullet-kafka?branch=master) 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yahoo.bullet/bullet-kafka/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.yahoo.bullet/bullet-kafka/)
 
 ## Introduction
 
