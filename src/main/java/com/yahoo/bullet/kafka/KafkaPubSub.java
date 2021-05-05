@@ -33,6 +33,7 @@ public class KafkaPubSub extends PubSub {
     private String queryTopicName;
     private String responseTopicName;
     private String topic;
+    private boolean partitionRoutingDisable;
     private List<TopicPartition> partitions;
     private Map<String, Object> producerProperties;
     private Map<String, Object> consumerProperties;
@@ -60,6 +61,7 @@ public class KafkaPubSub extends PubSub {
         queryTopicName = config.getAs(KafkaConfig.REQUEST_TOPIC_NAME, String.class);
         responseTopicName  = config.getAs(KafkaConfig.RESPONSE_TOPIC_NAME, String.class);
         topic = (context == Context.QUERY_PROCESSING) ? queryTopicName : responseTopicName;
+        partitionRoutingDisable = config.getAs(KafkaConfig.PARTITION_ROUTING_DISABLE, Boolean.class);
 
         queryPartitions = parsePartitionsFor(queryTopicName, KafkaConfig.REQUEST_PARTITIONS);
         responsePartitions = parsePartitionsFor(responseTopicName, KafkaConfig.RESPONSE_PARTITIONS);
@@ -80,13 +82,13 @@ public class KafkaPubSub extends PubSub {
 
         if (context == Context.QUERY_PROCESSING) {
             // We don't need to provide topic-partitions here since they should be in the message metadata
-            return new KafkaResponsePublisher(producer);
+            return new KafkaResponsePublisher(producer, responseTopicName, partitionRoutingDisable);
         }
 
         List<TopicPartition> to = (queryPartitions == null) ? getAllPartitions(getDummyProducer(), queryTopicName) : queryPartitions;
         List<TopicPartition> from = (responsePartitions == null) ? getAllPartitions(getDummyProducer(), responseTopicName) : responsePartitions;
 
-        return new KafkaQueryPublisher(producer, to, from);
+        return new KafkaQueryPublisher(producer, to, from, queryTopicName, partitionRoutingDisable);
     }
 
     @Override
@@ -174,6 +176,9 @@ public class KafkaPubSub extends PubSub {
     private Subscriber getSubscriber(List<TopicPartition> partitions, String topicName) throws PubSubException {
         // Get the PubSub Consumer specific properties
         Number maxUnackedMessages = config.getAs(KafkaConfig.MAX_UNCOMMITTED_MESSAGES, Number.class);
+        Number rateLimitMaxMessages = config.getAs(KafkaConfig.RATE_LIMIT_MAX_MESSAGES, Number.class);
+        Number rateLimitIntervalMS = config.getAs(KafkaConfig.RATE_LIMIT_INTERVAL_MS, Number.class);
+        boolean rateLimitEnable = config.getAs(KafkaConfig.RATE_LIMIT_ENABLE, Boolean.class);
 
         // Is autocommit on
         boolean enableAutoCommit = Boolean.parseBoolean(config.getAs(KafkaConfig.ENABLE_AUTO_COMMIT, String.class));
@@ -184,6 +189,10 @@ public class KafkaPubSub extends PubSub {
             consumer.subscribe(Collections.singleton(topicName));
         } else {
             consumer.assign(partitions);
+        }
+        if (rateLimitEnable) {
+            return new KafkaSubscriber(consumer, maxUnackedMessages.intValue(), rateLimitMaxMessages.intValue(),
+                                       rateLimitIntervalMS.longValue(), !enableAutoCommit);
         }
         return new KafkaSubscriber(consumer, maxUnackedMessages.intValue(), !enableAutoCommit);
     }
