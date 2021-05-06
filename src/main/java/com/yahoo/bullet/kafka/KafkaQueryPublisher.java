@@ -41,11 +41,6 @@ public class KafkaQueryPublisher implements Publisher {
     }
 
     @Override
-    public PubSubMessage send(String id, byte[] content) throws PubSubException {
-        return send(new PubSubMessage(id, content));
-    }
-
-    @Override
     public PubSubMessage send(PubSubMessage message) throws PubSubException {
         if (partitionRoutingEnabled) {
             TopicPartition requestPartition = getPartition(writePartitions, message);
