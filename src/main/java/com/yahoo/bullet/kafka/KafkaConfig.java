@@ -51,7 +51,7 @@ public class KafkaConfig extends BulletConfig {
     public static final String RESPONSE_PARTITIONS = KAFKA_NAMESPACE + "response.partitions";
     public static final String REQUEST_TOPIC_NAME = KAFKA_NAMESPACE + "request.topic.name";
     public static final String RESPONSE_TOPIC_NAME = KAFKA_NAMESPACE + "response.topic.name";
-    public static final String PARTITION_ROUTING_DISABLE = KAFKA_NAMESPACE + "partition.routing.disable";
+    public static final String PARTITION_ROUTING_ENABLE = KAFKA_NAMESPACE + "partition.routing.enable";
 
     // Kafka PubSub Subscriber properties
     public static final String MAX_UNCOMMITTED_MESSAGES = KAFKA_NAMESPACE + "subscriber.max.uncommitted.messages";
@@ -64,7 +64,7 @@ public class KafkaConfig extends BulletConfig {
     private static String FALSE = "false";
     public static final String DEFAULT_KAFKA_CONFIGURATION = "bullet_kafka_defaults.yaml";
     public static final String DEFAULT_ENABLE_AUTO_COMMIT = TRUE;
-    public static final boolean DEFAULT_PARTITION_ROUTING_DISABLE = false;
+    public static final boolean DEFAULT_PARTITION_ROUTING_ENABLE = true;
     public static final boolean DEFAULT_RATE_LIMIT_ENABLE = false;
 
     private static final Validator VALIDATOR = BulletConfig.getValidator();
@@ -132,9 +132,9 @@ public class KafkaConfig extends BulletConfig {
                  .castTo(Validator::asInt)
                  .unless(Validator::isNull)
                  .orFail();
-        VALIDATOR.define(PARTITION_ROUTING_DISABLE)
+        VALIDATOR.define(PARTITION_ROUTING_ENABLE)
                  .checkIf(Validator::isBoolean)
-                 .defaultTo(DEFAULT_PARTITION_ROUTING_DISABLE);
+                 .defaultTo(DEFAULT_PARTITION_ROUTING_ENABLE);
         VALIDATOR.define(RATE_LIMIT_ENABLE)
                  .checkIf(Validator::isBoolean)
                  .defaultTo(DEFAULT_RATE_LIMIT_ENABLE);

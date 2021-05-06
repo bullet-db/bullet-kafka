@@ -45,9 +45,9 @@ bullet.pubsub.kafka.subscriber.rate.limit.interval.ms: 10
 bullet.pubsub.kafka.request.topic.name: "bullet.queries"
 bullet.pubsub.kafka.response.topic.name: "bullet.responses"
 # By default, the partition routing information is stored in the message metadata by the query publisher and used
-# by the response publisher when sending back messages. This setting disables that behavior, allowing responses to be
-# published to any arbitrary partition.
-bullet.pubsub.kafka.partition.routing.disable: false
+# by the response publisher when sending back messages. If this is false, no routing information is stored, and Kafka
+# decides which partitions responses are sent to.
+bullet.pubsub.kafka.partition.routing.enable: true
 
 # Optional settings:
 

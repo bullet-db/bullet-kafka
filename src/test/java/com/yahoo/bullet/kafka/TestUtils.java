@@ -39,12 +39,15 @@ public class TestUtils {
     }
 
     public static TopicPartition getSendPartition(ProducerRecord<String, byte[]> record) {
-        return new TopicPartition(record.topic(), record.partition());
+        return new TopicPartition(record.topic(), record.partition() == null ? -1 : record.partition());
     }
 
     public static TopicPartition getMetadataPartition(ProducerRecord<String, byte[]> record) {
         PubSubMessage message = SerializerDeserializer.fromBytes(record.value());
-        return ((KafkaMetadata) message.getMetadata()).getTopicPartition();
+        if (message.getMetadata() instanceof KafkaMetadata) {
+            return ((KafkaMetadata) message.getMetadata()).getTopicPartition();
+        }
+        return null;
     }
 
     public static String getMessageID(ProducerRecord<String, byte[]> record) {

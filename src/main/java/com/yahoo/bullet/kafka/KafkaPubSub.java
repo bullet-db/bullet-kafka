@@ -33,7 +33,7 @@ public class KafkaPubSub extends PubSub {
     private String queryTopicName;
     private String responseTopicName;
     private String topic;
-    private boolean partitionRoutingDisable;
+    private boolean partitionRoutingEnabled;
     private List<TopicPartition> partitions;
     private Map<String, Object> producerProperties;
     private Map<String, Object> consumerProperties;
@@ -61,7 +61,7 @@ public class KafkaPubSub extends PubSub {
         queryTopicName = config.getAs(KafkaConfig.REQUEST_TOPIC_NAME, String.class);
         responseTopicName  = config.getAs(KafkaConfig.RESPONSE_TOPIC_NAME, String.class);
         topic = (context == Context.QUERY_PROCESSING) ? queryTopicName : responseTopicName;
-        partitionRoutingDisable = config.getAs(KafkaConfig.PARTITION_ROUTING_DISABLE, Boolean.class);
+        partitionRoutingEnabled = config.getAs(KafkaConfig.PARTITION_ROUTING_ENABLE, Boolean.class);
 
         queryPartitions = parsePartitionsFor(queryTopicName, KafkaConfig.REQUEST_PARTITIONS);
         responsePartitions = parsePartitionsFor(responseTopicName, KafkaConfig.RESPONSE_PARTITIONS);
@@ -81,14 +81,15 @@ public class KafkaPubSub extends PubSub {
         KafkaProducer<String, byte[]> producer = new KafkaProducer<>(producerProperties);
 
         if (context == Context.QUERY_PROCESSING) {
-            // We don't need to provide topic-partitions here since they should be in the message metadata
-            return new KafkaResponsePublisher(producer, responseTopicName, partitionRoutingDisable);
+            // We don't provide topic partitions here since they should be in the message metadata when partition routing
+            // is enabled. When partition routing is not enabled, the publisher uses the given topic name instead.
+            return new KafkaResponsePublisher(producer, responseTopicName, partitionRoutingEnabled);
         }
 
         List<TopicPartition> to = (queryPartitions == null) ? getAllPartitions(getDummyProducer(), queryTopicName) : queryPartitions;
         List<TopicPartition> from = (responsePartitions == null) ? getAllPartitions(getDummyProducer(), responseTopicName) : responsePartitions;
 
-        return new KafkaQueryPublisher(producer, to, from, queryTopicName, partitionRoutingDisable);
+        return new KafkaQueryPublisher(producer, to, from, queryTopicName, partitionRoutingEnabled);
     }
 
     @Override

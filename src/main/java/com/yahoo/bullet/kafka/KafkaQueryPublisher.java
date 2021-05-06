@@ -23,7 +23,7 @@ public class KafkaQueryPublisher implements Publisher {
     private final List<TopicPartition> writePartitions;
     private final List<TopicPartition> receivePartitions;
     private final String queryTopic;
-    private final boolean partitionRoutingDisable;
+    private final boolean partitionRoutingEnabled;
 
     /**
      * Set metadata required to route responses.
@@ -47,15 +47,15 @@ public class KafkaQueryPublisher implements Publisher {
 
     @Override
     public PubSubMessage send(PubSubMessage message) throws PubSubException {
-        if (partitionRoutingDisable) {
-            producer.send(new ProducerRecord<>(queryTopic, message.getId(), SerializerDeserializer.toBytes(message)));
-        } else {
+        if (partitionRoutingEnabled) {
             TopicPartition requestPartition = getPartition(writePartitions, message);
             setRouteData(message);
             producer.send(new ProducerRecord<>(requestPartition.topic(),
                                                requestPartition.partition(),
                                                message.getId(),
                                                SerializerDeserializer.toBytes(message)));
+        } else {
+            producer.send(new ProducerRecord<>(queryTopic, message.getId(), SerializerDeserializer.toBytes(message)));
         }
         return message;
     }

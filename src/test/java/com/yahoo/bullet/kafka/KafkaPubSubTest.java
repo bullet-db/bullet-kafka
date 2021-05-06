@@ -108,6 +108,16 @@ public class KafkaPubSubTest {
     }
 
     @Test
+    public void testGetSubscribersWithRateLimit() throws Exception {
+        BulletConfig config = new BulletConfig("test_config.yaml");
+        config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
+        config.set(KafkaConfig.RATE_LIMIT_ENABLE, true);
+        KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
+        List<Subscriber> subscribers = kafkaPubSub.getSubscribers(10);
+        Assert.assertEquals(subscribers.size(), 4);
+    }
+
+    @Test
     public void testGetPublishers() throws Exception {
         BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");

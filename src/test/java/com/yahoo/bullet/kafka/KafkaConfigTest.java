@@ -28,6 +28,8 @@ public class KafkaConfigTest {
         Assert.assertEquals(config.get(KafkaConfig.REQUEST_TOPIC_NAME), "bullet.queries");
         Assert.assertEquals(config.get(REQUEST_TIMEOUT), "3000");
         Assert.assertEquals(config.get(KafkaConfig.CONSUMER_NAMESPACE + "request.timeout.ms"), "35000");
+        Assert.assertFalse(config.getAs(KafkaConfig.RATE_LIMIT_ENABLE, Boolean.class));
+        Assert.assertTrue(config.getAs(KafkaConfig.PARTITION_ROUTING_ENABLE, Boolean.class));
     }
 
     @Test

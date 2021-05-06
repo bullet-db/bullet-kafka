@@ -148,4 +148,27 @@ public class KafkaSubscriberTest {
         Assert.assertNull(subscriber.receive());
         verify(consumer, times(2)).commitAsync();
     }
+
+    @Test
+    public void testRateLimit() throws PubSubException, InterruptedException {
+        String randomMessage = UUID.randomUUID().toString();
+        String randomID = UUID.randomUUID().toString();
+        KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
+        ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage, null));
+        when(consumer.poll(any())).thenReturn(records);
+        KafkaSubscriber subscriber = new KafkaSubscriber(consumer, 20, 5, 10L);
+
+        for (int i = 0; i < 5; i++) {
+            Assert.assertNotNull(subscriber.receive());
+        }
+        Assert.assertNull(subscriber.receive());
+
+        // Sleep to reset interval
+        Thread.sleep(15);
+
+        for (int i = 0; i < 5; i++) {
+            Assert.assertNotNull(subscriber.receive());
+        }
+        Assert.assertNull(subscriber.receive());
+    }
 }
