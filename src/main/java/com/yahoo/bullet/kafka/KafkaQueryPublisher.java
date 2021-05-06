@@ -22,7 +22,6 @@ public class KafkaQueryPublisher implements Publisher {
     private final KafkaProducer<String, byte[]> producer;
     private final List<TopicPartition> writePartitions;
     private final List<TopicPartition> receivePartitions;
-    private final String queryTopic;
     private final boolean partitionRoutingEnabled;
 
     /**
@@ -42,16 +41,14 @@ public class KafkaQueryPublisher implements Publisher {
 
     @Override
     public PubSubMessage send(PubSubMessage message) throws PubSubException {
+        TopicPartition requestPartition = getPartition(writePartitions, message);
         if (partitionRoutingEnabled) {
-            TopicPartition requestPartition = getPartition(writePartitions, message);
             setRouteData(message);
-            producer.send(new ProducerRecord<>(requestPartition.topic(),
-                                               requestPartition.partition(),
-                                               message.getId(),
-                                               SerializerDeserializer.toBytes(message)));
-        } else {
-            producer.send(new ProducerRecord<>(queryTopic, message.getId(), SerializerDeserializer.toBytes(message)));
         }
+        producer.send(new ProducerRecord<>(requestPartition.topic(),
+                                           requestPartition.partition(),
+                                           message.getId(),
+                                           SerializerDeserializer.toBytes(message)));
         return message;
     }
 

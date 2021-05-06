@@ -89,7 +89,7 @@ public class KafkaPubSub extends PubSub {
         List<TopicPartition> to = (queryPartitions == null) ? getAllPartitions(getDummyProducer(), queryTopicName) : queryPartitions;
         List<TopicPartition> from = (responsePartitions == null) ? getAllPartitions(getDummyProducer(), responseTopicName) : responsePartitions;
 
-        return new KafkaQueryPublisher(producer, to, from, queryTopicName, partitionRoutingEnabled);
+        return new KafkaQueryPublisher(producer, to, from, partitionRoutingEnabled);
     }
 
     @Override
