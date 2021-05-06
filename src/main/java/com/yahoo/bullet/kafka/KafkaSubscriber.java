@@ -11,6 +11,7 @@ import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -23,7 +24,7 @@ import java.util.List;
 
 @Slf4j
 public class KafkaSubscriber extends BufferingSubscriber {
-    @Getter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
     private KafkaConsumer<String, byte[]> consumer;
     private boolean manualCommit;
 

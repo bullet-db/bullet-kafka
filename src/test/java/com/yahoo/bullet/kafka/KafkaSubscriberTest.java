@@ -5,25 +5,19 @@
  */
 package com.yahoo.bullet.kafka;
 
-import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Subscriber;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.TopicPartition;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
+import static com.yahoo.bullet.kafka.TestUtils.makeConsumerRecords;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -32,14 +26,6 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 public class KafkaSubscriberTest {
-    private ConsumerRecords<String, byte[]> makeConsumerRecords(String randomID, Serializable message) {
-        ConsumerRecord<String, byte[]> record = new ConsumerRecord<>("testMessage", 0, 0, randomID,
-                                                                     SerializerDeserializer.toBytes(message));
-        Map<TopicPartition, List<ConsumerRecord<String, byte[]>>> recordMap = new HashMap<>();
-        recordMap.put(new TopicPartition("testMessage", 0), Collections.singletonList(record));
-        return new ConsumerRecords<>(recordMap);
-    }
-
     private KafkaConsumer<String, byte[]> makeMockConsumer(String randomID, String randomMessage) {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
         ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage, null));
