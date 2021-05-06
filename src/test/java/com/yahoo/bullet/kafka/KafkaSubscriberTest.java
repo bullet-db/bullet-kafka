@@ -142,7 +142,7 @@ public class KafkaSubscriberTest {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
         ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage, null));
         when(consumer.poll(any())).thenReturn(records);
-        KafkaSubscriber subscriber = new KafkaSubscriber(consumer, 20, 5, 10L);
+        KafkaSubscriber subscriber = new KafkaSubscriber(consumer, 20, 5, 50L);
 
         for (int i = 0; i < 5; i++) {
             Assert.assertNotNull(subscriber.receive());
@@ -150,7 +150,7 @@ public class KafkaSubscriberTest {
         Assert.assertNull(subscriber.receive());
 
         // Sleep to reset interval
-        Thread.sleep(15);
+        Thread.sleep(55);
 
         for (int i = 0; i < 5; i++) {
             Assert.assertNotNull(subscriber.receive());
