@@ -67,6 +67,7 @@ public class KafkaConfig extends BulletConfig {
     public static final boolean DEFAULT_PARTITION_ROUTING_ENABLE = true;
     public static final boolean DEFAULT_RATE_LIMIT_ENABLE = false;
 
+    private static final long serialVersionUID = 7613682421100044732L;
     private static final Validator VALIDATOR = BulletConfig.getValidator();
 
     static {
