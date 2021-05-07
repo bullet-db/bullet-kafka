@@ -77,19 +77,17 @@ public class KafkaPubSub extends PubSub {
     }
 
     @Override
-    public Publisher getPublisher() throws PubSubException {
+    public Publisher getPublisher() {
         KafkaProducer<String, byte[]> producer = new KafkaProducer<>(producerProperties);
 
+        List<TopicPartition> forResponses = (responsePartitions == null) ? getAllPartitions(getDummyProducer(), responseTopicName) : responsePartitions;
+
         if (context == Context.QUERY_PROCESSING) {
-            // We don't provide topic partitions here since they should be in the message metadata when partition routing
-            // is enabled. When partition routing is not enabled, the publisher uses the given topic name instead.
-            return new KafkaResponsePublisher(producer, responseTopicName, partitionRoutingEnabled);
+            return new KafkaResponsePublisher(producer, forResponses, partitionRoutingEnabled);
         }
 
-        List<TopicPartition> to = (queryPartitions == null) ? getAllPartitions(getDummyProducer(), queryTopicName) : queryPartitions;
-        List<TopicPartition> from = (responsePartitions == null) ? getAllPartitions(getDummyProducer(), responseTopicName) : responsePartitions;
-
-        return new KafkaQueryPublisher(producer, to, from, partitionRoutingEnabled);
+        List<TopicPartition> forQueries = (queryPartitions == null) ? getAllPartitions(getDummyProducer(), queryTopicName) : queryPartitions;
+        return new KafkaQueryPublisher(producer, forQueries, forResponses, partitionRoutingEnabled);
     }
 
     @Override
@@ -99,7 +97,7 @@ public class KafkaPubSub extends PubSub {
     }
 
     @Override
-    public Subscriber getSubscriber() throws PubSubException {
+    public Subscriber getSubscriber() {
         return getSubscriber(partitions, topic);
     }
 
@@ -174,7 +172,7 @@ public class KafkaPubSub extends PubSub {
      * @param topicName The topic to subscribe to if partitions are not given.
      * @return The Subscriber reading from the appropriate topic/partitions.
      */
-    private Subscriber getSubscriber(List<TopicPartition> partitions, String topicName) throws PubSubException {
+    private Subscriber getSubscriber(List<TopicPartition> partitions, String topicName) {
         // Get the PubSub Consumer specific properties
         Number maxUnackedMessages = config.getAs(KafkaConfig.MAX_UNCOMMITTED_MESSAGES, Number.class);
         Number rateLimitMaxMessages = config.getAs(KafkaConfig.RATE_LIMIT_MAX_MESSAGES, Number.class);

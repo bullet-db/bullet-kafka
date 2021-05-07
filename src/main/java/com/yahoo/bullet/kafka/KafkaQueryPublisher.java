@@ -17,6 +17,9 @@ import org.apache.kafka.common.TopicPartition;
 
 import java.util.List;
 
+import static com.yahoo.bullet.kafka.KafkaMetadata.getPartition;
+import static com.yahoo.bullet.kafka.KafkaMetadata.setRouteData;
+
 @Getter @RequiredArgsConstructor
 public class KafkaQueryPublisher implements Publisher {
     private final KafkaProducer<String, byte[]> producer;
@@ -24,26 +27,11 @@ public class KafkaQueryPublisher implements Publisher {
     private final List<TopicPartition> receivePartitions;
     private final boolean partitionRoutingEnabled;
 
-    /**
-     * Set metadata required to route responses.
-     *
-     * @param message The {@link PubSubMessage} to set metadata to.
-     */
-    private void setRouteData(PubSubMessage message) throws PubSubException {
-        try {
-            TopicPartition responsePartition = getPartition(receivePartitions, message);
-            message.setMetadata(message.hasMetadata() ? new KafkaMetadata(message.getMetadata(), responsePartition) :
-                                                        new KafkaMetadata(responsePartition));
-        } catch (Exception e) {
-            throw new PubSubException("Could not set route metadata.", e);
-        }
-    }
-
     @Override
     public PubSubMessage send(PubSubMessage message) throws PubSubException {
         TopicPartition requestPartition = getPartition(writePartitions, message);
         if (partitionRoutingEnabled) {
-            setRouteData(message);
+            setRouteData(receivePartitions, message);
         }
         producer.send(new ProducerRecord<>(requestPartition.topic(),
                                            requestPartition.partition(),
@@ -55,10 +43,5 @@ public class KafkaQueryPublisher implements Publisher {
     @Override
     public void close() {
         producer.close();
-    }
-
-    private TopicPartition getPartition(List<TopicPartition> partitionList, PubSubMessage message) {
-        int partitionIndex = Math.abs(message.getId().hashCode() % partitionList.size());
-        return partitionList.get(partitionIndex);
     }
 }

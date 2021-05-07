@@ -15,26 +15,22 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 
-import java.util.Objects;
+import java.util.List;
 
-@Slf4j
-@RequiredArgsConstructor
+import static com.yahoo.bullet.kafka.KafkaMetadata.getPartition;
+import static com.yahoo.bullet.kafka.KafkaMetadata.getRouteInfo;
+
+@Slf4j @RequiredArgsConstructor
 public class KafkaResponsePublisher implements Publisher {
     private final KafkaProducer<String, byte[]> producer;
-    private final String responseTopic;
+    private final List<TopicPartition> writePartitions;
     private final boolean partitionRoutingEnabled;
 
     @Override
     public PubSubMessage send(PubSubMessage message) throws PubSubException {
-        if (partitionRoutingEnabled) {
-            TopicPartition responsePartition = getRouteInfo(message);
-            producer.send(new ProducerRecord<>(responsePartition.topic(),
-                                               responsePartition.partition(),
-                                               message.getId(),
-                                               SerializerDeserializer.toBytes(message)));
-        } else {
-            producer.send(new ProducerRecord<>(responseTopic, message.getId(), SerializerDeserializer.toBytes(message)));
-        }
+        TopicPartition responsePartition = partitionRoutingEnabled ? getRouteInfo(message) : getPartition(writePartitions, message);
+        producer.send(new ProducerRecord<>(responsePartition.topic(), responsePartition.partition(),
+                                           message.getId(), SerializerDeserializer.toBytes(message)));
         return message;
     }
 
@@ -42,15 +38,6 @@ public class KafkaResponsePublisher implements Publisher {
     @Override
     public void close() {
         producer.close();
-    }
-
-    private TopicPartition getRouteInfo(PubSubMessage message) throws PubSubException {
-        try {
-            KafkaMetadata metadata = (KafkaMetadata) message.getMetadata();
-            return Objects.requireNonNull(metadata.getTopicPartition());
-        } catch (Exception e) {
-            throw new PubSubException("Invalid route information", e);
-        }
     }
 }
 
