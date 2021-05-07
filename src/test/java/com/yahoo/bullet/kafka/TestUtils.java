@@ -9,10 +9,14 @@ import com.yahoo.bullet.common.SerializerDeserializer;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,12 +43,15 @@ public class TestUtils {
     }
 
     public static TopicPartition getSendPartition(ProducerRecord<String, byte[]> record) {
-        return new TopicPartition(record.topic(), record.partition());
+        return new TopicPartition(record.topic(), record.partition() == null ? -1 : record.partition());
     }
 
     public static TopicPartition getMetadataPartition(ProducerRecord<String, byte[]> record) {
         PubSubMessage message = SerializerDeserializer.fromBytes(record.value());
-        return ((KafkaMetadata) message.getMetadata()).getTopicPartition();
+        if (message.getMetadata() instanceof KafkaMetadata) {
+            return ((KafkaMetadata) message.getMetadata()).getTopicPartition();
+        }
+        return null;
     }
 
     public static String getMessageID(ProducerRecord<String, byte[]> record) {
@@ -82,5 +89,13 @@ public class TestUtils {
             groupedData.put(key, messageSet);
         }
         return groupedData;
+    }
+
+    public static ConsumerRecords<String, byte[]> makeConsumerRecords(String randomID, Serializable message) {
+        ConsumerRecord<String, byte[]> record = new ConsumerRecord<>("testMessage", 0, 0, randomID,
+                                                                     SerializerDeserializer.toBytes(message));
+        Map<TopicPartition, List<ConsumerRecord<String, byte[]>>> recordMap = new HashMap<>();
+        recordMap.put(new TopicPartition("testMessage", 0), Collections.singletonList(record));
+        return new ConsumerRecords<>(recordMap);
     }
 }

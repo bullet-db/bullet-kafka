@@ -32,7 +32,7 @@ public class KafkaQueryPublisherTest {
                                                                         .mapToObj(x -> new TopicPartition("", x))
                                                                         .collect(Collectors.toList());
     private static List<TopicPartition> responsePartitionList = new ArrayList<>(requestPartitionList);
-    private static Publisher publisher = new KafkaQueryPublisher(mockProducer, requestPartitionList, responsePartitionList);
+    private static Publisher publisher = new KafkaQueryPublisher(mockProducer, requestPartitionList, responsePartitionList, true);
 
     @BeforeMethod
     public void setup() throws PubSubException {
@@ -74,5 +74,13 @@ public class KafkaQueryPublisherTest {
         Assert.assertEquals(kafkaQueryPublisher.getReceivePartitions(), responsePartitionList);
         Assert.assertEquals(kafkaQueryPublisher.getWritePartitions(), requestPartitionList);
         Assert.assertEquals(kafkaQueryPublisher.getProducer(), mockProducer);
+        Assert.assertTrue(kafkaQueryPublisher.isPartitionRoutingEnabled());
+    }
+
+    @Test
+    public void testPartitionRoutingDisabled() throws PubSubException {
+        Publisher publisher = new KafkaQueryPublisher(mockProducer, requestPartitionList, responsePartitionList, false);
+        PubSubMessage message = publisher.send(new PubSubMessage("foo", "bar"));
+        Assert.assertNull(message.getMetadata());
     }
 }

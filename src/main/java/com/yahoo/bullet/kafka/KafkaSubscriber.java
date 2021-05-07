@@ -11,6 +11,7 @@ import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -23,7 +24,7 @@ import java.util.List;
 
 @Slf4j
 public class KafkaSubscriber extends BufferingSubscriber {
-    @Getter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
     private KafkaConsumer<String, byte[]> consumer;
     private boolean manualCommit;
 
@@ -49,6 +50,22 @@ public class KafkaSubscriber extends BufferingSubscriber {
      */
     public KafkaSubscriber(KafkaConsumer<String, byte[]> consumer, int maxUncommittedMessages) {
         this(consumer, maxUncommittedMessages, false);
+    }
+
+    /**
+     * Creates a rate-limited KafkaSubscriber using a {@link KafkaConsumer}.
+     *
+     * @param consumer The {@link KafkaConsumer} to read data from.
+     * @param maxUncommittedMessages The maximum number of messages that can be received before a commit is needed.
+     * @param rateLimitMaxMessages The maximum number of messages that will be read in a rate limit interval.
+     * @param rateLimitIntervalMS The duration of a rate limit interval in milliseconds.
+     * @param manualCommit Should this subscriber commit its offsets manually.
+     */
+    public KafkaSubscriber(KafkaConsumer<String, byte[]> consumer, int maxUncommittedMessages, int rateLimitMaxMessages,
+                           long rateLimitIntervalMS, boolean manualCommit) {
+        super(maxUncommittedMessages, rateLimitMaxMessages, rateLimitIntervalMS);
+        this.consumer = consumer;
+        this.manualCommit = manualCommit;
     }
 
     @Override

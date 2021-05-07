@@ -28,8 +28,23 @@ public class KafkaResponsePublisherTest {
         KafkaProducer<String, byte[]> mockProducer = TestUtils.mockProducerTo(messageStore);
         TopicPartition randomTopicPartition = new TopicPartition(TestUtils.getRandomString(), 0);
         String randomID = TestUtils.getRandomString();
-        Publisher publisher = new KafkaResponsePublisher(mockProducer);
+        Publisher publisher = new KafkaResponsePublisher(mockProducer, "topic", true);
         publisher.send(new PubSubMessage(randomID, "", new KafkaMetadata(randomTopicPartition)));
+        Map<String, Set<TopicPartition>> sentMessages = messageStore.groupSendPartitionById();
+
+        Assert.assertEquals(sentMessages.size(), 1);
+        Assert.assertTrue(sentMessages.keySet().contains(randomID));
+        Assert.assertTrue(sentMessages.get(randomID).contains(randomTopicPartition));
+    }
+
+    @Test
+    public void testSendPartitionPartitionRoutingDisabled() throws PubSubException {
+        MessageStore messageStore = new MessageStore();
+        KafkaProducer<String, byte[]> mockProducer = TestUtils.mockProducerTo(messageStore);
+        TopicPartition randomTopicPartition = new TopicPartition("topic", -1);
+        String randomID = TestUtils.getRandomString();
+        Publisher publisher = new KafkaResponsePublisher(mockProducer, "topic", false);
+        publisher.send(new PubSubMessage(randomID, "", new Metadata()));
         Map<String, Set<TopicPartition>> sentMessages = messageStore.groupSendPartitionById();
 
         Assert.assertEquals(sentMessages.size(), 1);
@@ -40,21 +55,21 @@ public class KafkaResponsePublisherTest {
     @Test(expectedExceptions = PubSubException.class)
     public void testInvalidRouteInformation() throws PubSubException {
         KafkaProducer<String, byte[]> mockProducer = (KafkaProducer<String, byte[]>) mock(KafkaProducer.class);
-        Publisher publisher = new KafkaResponsePublisher(mockProducer);
+        Publisher publisher = new KafkaResponsePublisher(mockProducer, "topic", true);
         publisher.send(new PubSubMessage("", "", new Metadata(null, "")));
     }
 
     @Test(expectedExceptions = PubSubException.class)
     public void testNoRouteInformation() throws PubSubException {
         KafkaProducer<String, byte[]> mockProducer = (KafkaProducer<String, byte[]>) mock(KafkaProducer.class);
-        Publisher publisher = new KafkaResponsePublisher(mockProducer);
+        Publisher publisher = new KafkaResponsePublisher(mockProducer, "topic", true);
         publisher.send(new PubSubMessage("", "", new Metadata(null, null)));
     }
 
     @Test
     public void testClose() throws Exception {
         KafkaProducer<String, byte[]> mockProducer = (KafkaProducer<String, byte[]>) mock(KafkaProducer.class);
-        Publisher publisher = new KafkaResponsePublisher(mockProducer);
+        Publisher publisher = new KafkaResponsePublisher(mockProducer, "topic", true);
         publisher.close();
         verify(mockProducer).close();
     }

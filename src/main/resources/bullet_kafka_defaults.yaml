@@ -36,8 +36,18 @@ bullet.pubsub.kafka.consumer.request.timeout.ms: "35000"
 # Kafka PubSub properties
 # The number of messages that can be received before at least one commit is needed.
 bullet.pubsub.kafka.subscriber.max.uncommitted.messages: 50
+# Should the subscriber be rate limited
+bullet.pubsub.kafka.subscriber.rate.limit.enable: false
+# The maximum number of messages that will be read in a rate limit interval.
+bullet.pubsub.kafka.subscriber.rate.limit.max.messages: 50
+# The duration of a rate limit interval in milliseconds.
+bullet.pubsub.kafka.subscriber.rate.limit.interval.ms: 10
 bullet.pubsub.kafka.request.topic.name: "bullet.queries"
 bullet.pubsub.kafka.response.topic.name: "bullet.responses"
+# By default, the partition routing information is stored in the message metadata by the query publisher and used
+# by the response publisher when sending back messages. If this is false, no routing information is stored, and Kafka
+# decides which partitions responses are sent to.
+bullet.pubsub.kafka.partition.routing.enable: true
 
 # Optional settings:
 

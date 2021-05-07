@@ -8,8 +8,10 @@ package com.yahoo.bullet.kafka;
 import com.yahoo.bullet.common.BulletConfig;
 import com.yahoo.bullet.pubsub.PubSub;
 import com.yahoo.bullet.pubsub.PubSubException;
+import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Publisher;
 import com.yahoo.bullet.pubsub.Subscriber;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.PartitionInfo;
@@ -23,8 +25,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.yahoo.bullet.kafka.TestUtils.makeConsumerRecords;
 import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 public class KafkaPubSubTest {
     private static final String MAX_BLOCK_MS = KafkaConfig.PRODUCER_NAMESPACE + "max.block.ms";
@@ -102,9 +107,48 @@ public class KafkaPubSubTest {
     public void testGetSubscribers() throws Exception {
         BulletConfig config = new BulletConfig("test_config.yaml");
         config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
+        config.set(KafkaConfig.RATE_LIMIT_ENABLE, false);
+        config.set(KafkaConfig.RATE_LIMIT_MAX_MESSAGES, 5);
+        config.set(KafkaConfig.RATE_LIMIT_INTERVAL_MS, 1000);
         KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
         List<Subscriber> subscribers = kafkaPubSub.getSubscribers(10);
         Assert.assertEquals(subscribers.size(), 4);
+
+        // Confirming that these subscribers are not rate limited.
+        KafkaConsumer<String, byte[]> mockConsumer = (KafkaConsumer<String, byte[]>) Mockito.mock(KafkaConsumer.class);
+        ConsumerRecords<String, byte[]> records = makeConsumerRecords("id", new PubSubMessage("id", "message", null));
+        when(mockConsumer.poll(any())).thenReturn(records);
+        for (Subscriber subscriber : subscribers) {
+            KafkaSubscriber kafkaSubscriber = (KafkaSubscriber) subscriber;
+            kafkaSubscriber.setConsumer(mockConsumer);
+            for (int i = 0; i < 10; i++) {
+                Assert.assertNotNull(kafkaSubscriber.receive());
+            }
+        }
+    }
+
+    @Test
+    public void testGetSubscribersWithRateLimit() throws Exception {
+        BulletConfig config = new BulletConfig("test_config.yaml");
+        config.set(BulletConfig.PUBSUB_CONTEXT_NAME, "QUERY_PROCESSING");
+        config.set(KafkaConfig.RATE_LIMIT_ENABLE, true);
+        config.set(KafkaConfig.RATE_LIMIT_MAX_MESSAGES, 5);
+        config.set(KafkaConfig.RATE_LIMIT_INTERVAL_MS, 1000);
+        KafkaPubSub kafkaPubSub = new KafkaPubSub(new KafkaConfig(config));
+        List<Subscriber> subscribers = kafkaPubSub.getSubscribers(10);
+        Assert.assertEquals(subscribers.size(), 4);
+        // Confirming that these subscribers are rate limited.
+        KafkaConsumer<String, byte[]> mockConsumer = (KafkaConsumer<String, byte[]>) Mockito.mock(KafkaConsumer.class);
+        ConsumerRecords<String, byte[]> records = makeConsumerRecords("id", new PubSubMessage("id", "message", null));
+        when(mockConsumer.poll(any())).thenReturn(records);
+        for (Subscriber subscriber : subscribers) {
+            KafkaSubscriber kafkaSubscriber = (KafkaSubscriber) subscriber;
+            kafkaSubscriber.setConsumer(mockConsumer);
+            for (int i = 0; i < 5; i++) {
+                Assert.assertNotNull(kafkaSubscriber.receive());
+            }
+            Assert.assertNull(kafkaSubscriber.receive());
+        }
     }
 
     @Test
