@@ -136,25 +136,28 @@ public class KafkaSubscriberTest {
     }
 
     @Test
-    public void testRateLimit() throws PubSubException, InterruptedException {
+    public void testRateLimit() throws PubSubException {
+        final int maxMessages = 1000;
+        final long intervalMS = 500L;
         String randomMessage = UUID.randomUUID().toString();
         String randomID = UUID.randomUUID().toString();
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
         ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage, null));
         when(consumer.poll(any())).thenReturn(records);
-        KafkaSubscriber subscriber = new KafkaSubscriber(consumer, 20, 5, 50L);
-
-        for (int i = 0; i < 5; i++) {
-            Assert.assertNotNull(subscriber.receive());
+        KafkaSubscriber subscriber = new KafkaSubscriber(consumer, 10, maxMessages, intervalMS);
+        long before = System.currentTimeMillis();
+        int nonNullCount = 0;
+        while (System.currentTimeMillis() - before <= 5000) {
+            for (int i = 0; i < 100000; i++) {
+                if (subscriber.receive() != null) {
+                    nonNullCount++;
+                }
+            }
         }
-        Assert.assertNull(subscriber.receive());
-
-        // Sleep to reset interval
-        Thread.sleep(55);
-
-        for (int i = 0; i < 5; i++) {
-            Assert.assertNotNull(subscriber.receive());
-        }
-        Assert.assertNull(subscriber.receive());
+        long after = System.currentTimeMillis();
+        // Rounding the amount of time passed up to the next rate limit interval
+        double rate = (double) nonNullCount / (((after - before - 1) / intervalMS + 1) * intervalMS);
+        double acceptableRate = (double) maxMessages / intervalMS;
+        Assert.assertTrue(rate <= acceptableRate);
     }
 }
