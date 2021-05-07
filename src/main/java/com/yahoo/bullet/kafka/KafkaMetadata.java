@@ -48,7 +48,8 @@ public class KafkaMetadata extends Metadata implements Serializable {
     }
 
     /**
-     * Gets a {@link TopicPartition} from the given {@link List} for a particular {@link PubSubMessage}.
+     * Gets a {@link TopicPartition} from the given {@link List} for a particular {@link PubSubMessage}. For a given
+     * message and list of partitions, this method always picks the same partition.
      *
      * @param partitionList The {@link List} of {@link TopicPartition}.
      * @param message The {@link PubSubMessage} to deliver to one of the {@link TopicPartition}.
@@ -61,7 +62,7 @@ public class KafkaMetadata extends Metadata implements Serializable {
 
     /**
      * Given a {@link List} of {@link TopicPartition}, set metadata required to route responses into the
-     * {@link PubSubMessage}. For a given message and partitions, this method always picks the same partition.
+     * {@link PubSubMessage}. For a given message and list of partitions, this method always picks the same partition.
      *
      * @param partitions The {@link List} of {@link TopicPartition}.
      * @param message The {@link PubSubMessage} to set metadata to.
@@ -71,7 +72,7 @@ public class KafkaMetadata extends Metadata implements Serializable {
         try {
             TopicPartition partition = getPartition(partitions, message);
             message.setMetadata(message.hasMetadata() ? new KafkaMetadata(message.getMetadata(), partition) :
-                                new KafkaMetadata(partition));
+                                                        new KafkaMetadata(partition));
         } catch (Exception e) {
             throw new PubSubException("Could not set route metadata.", e);
         }
