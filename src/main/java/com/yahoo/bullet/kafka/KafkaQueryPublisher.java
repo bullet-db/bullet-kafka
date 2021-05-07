@@ -27,7 +27,6 @@ public class KafkaQueryPublisher implements Publisher {
     private final List<TopicPartition> receivePartitions;
     private final boolean partitionRoutingEnabled;
 
-
     @Override
     public PubSubMessage send(PubSubMessage message) throws PubSubException {
         TopicPartition requestPartition = getPartition(writePartitions, message);
