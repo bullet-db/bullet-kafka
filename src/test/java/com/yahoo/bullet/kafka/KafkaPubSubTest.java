@@ -6,6 +6,7 @@
 package com.yahoo.bullet.kafka;
 
 import com.yahoo.bullet.common.BulletConfig;
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSub;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
@@ -116,7 +117,7 @@ public class KafkaPubSubTest {
 
         // Confirming that these subscribers are not rate limited.
         KafkaConsumer<String, byte[]> mockConsumer = (KafkaConsumer<String, byte[]>) Mockito.mock(KafkaConsumer.class);
-        ConsumerRecords<String, byte[]> records = makeConsumerRecords("id", new PubSubMessage("id", "message", null));
+        ConsumerRecords<String, byte[]> records = makeConsumerRecords("id", new PubSubMessage("id", "message", (Metadata) null));
         when(mockConsumer.poll(any())).thenReturn(records);
         for (Subscriber subscriber : subscribers) {
             KafkaSubscriber kafkaSubscriber = (KafkaSubscriber) subscriber;
@@ -139,7 +140,7 @@ public class KafkaPubSubTest {
         Assert.assertEquals(subscribers.size(), 4);
         // Confirming that these subscribers are rate limited.
         KafkaConsumer<String, byte[]> mockConsumer = (KafkaConsumer<String, byte[]>) Mockito.mock(KafkaConsumer.class);
-        ConsumerRecords<String, byte[]> records = makeConsumerRecords("id", new PubSubMessage("id", "message", null));
+        ConsumerRecords<String, byte[]> records = makeConsumerRecords("id", new PubSubMessage("id", "message", (Metadata) null));
         when(mockConsumer.poll(any())).thenReturn(records);
         for (Subscriber subscriber : subscribers) {
             KafkaSubscriber kafkaSubscriber = (KafkaSubscriber) subscriber;
