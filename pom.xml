@@ -4,7 +4,7 @@
 
     <groupId>com.yahoo.bullet</groupId>
     <artifactId>bullet-kafka</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3</version>
     <packaging>jar</packaging>
     <name>bullet-kafka</name>
 
@@ -35,7 +35,7 @@
         <url>https://github.com/bullet-db/bullet-kafka</url>
         <connection>scm:git:ssh://git@github.com/bullet-db/bullet-kafka.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/bullet-db/bullet-kafka.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>bullet-kafka-1.2.3</tag>
     </scm>
 
     <developers>
