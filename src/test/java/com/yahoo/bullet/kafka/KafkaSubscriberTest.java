@@ -5,6 +5,7 @@
  */
 package com.yahoo.bullet.kafka;
 
+import com.yahoo.bullet.pubsub.Metadata;
 import com.yahoo.bullet.pubsub.PubSubException;
 import com.yahoo.bullet.pubsub.PubSubMessage;
 import com.yahoo.bullet.pubsub.Subscriber;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 public class KafkaSubscriberTest {
     private KafkaConsumer<String, byte[]> makeMockConsumer(String randomID, String randomMessage) {
         KafkaConsumer<String, byte[]> consumer = (KafkaConsumer<String, byte[]>) mock(KafkaConsumer.class);
-        ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage, null));
+        ConsumerRecords<String, byte[]> records = makeConsumerRecords(randomID, new PubSubMessage(randomID, randomMessage, (Metadata) null));
         when(consumer.poll(any())).thenReturn(records).thenReturn(new ConsumerRecords<>(new HashMap<>()));
         return consumer;
     }
