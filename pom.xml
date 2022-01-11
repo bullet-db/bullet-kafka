@@ -51,7 +51,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <bullet.core.version>1.5.1</bullet.core.version>
+        <bullet.core.version>1.5.2</bullet.core.version>
+        <slf4j.version>1.7.32</slf4j.version>
+        <log4j.version>2.17.1</log4j.version>
         <kafka.clients.version>2.6.0</kafka.clients.version>
     </properties>
 
@@ -69,16 +71,11 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Provided even though we build a fat jar since the application including this should provide the binding -->
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.10</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${log4j.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -88,6 +85,11 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.yahoo.athenz</groupId>
             <artifactId>athenz-cert-refresher</artifactId>
