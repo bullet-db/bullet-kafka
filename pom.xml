@@ -54,7 +54,7 @@
         <bullet.core.version>1.5.2</bullet.core.version>
         <slf4j.version>1.7.32</slf4j.version>
         <log4j.version>2.17.1</log4j.version>
-        <kafka.clients.version>2.6.0</kafka.clients.version>
+        <kafka.clients.version>2.6.3</kafka.clients.version>
     </properties>
 
     <dependencies>
